@@ -1,0 +1,24 @@
+modLoader = "javafml"
+loaderVersion = "[36,)"
+license = "GPLv3"
+issueTrackerURL = "https://github.com/DavidQF555/Tax/issues"
+[[mods]]
+modId = "tax"
+version = "${file.jarVersion}"
+displayName = "Tax"
+displayURL = "https://github.com/DavidQF555/Tax"
+#logoFile = "logo.png"
+authors = "DavidQF555"
+description = 'This mod adds tax.'
+[[dependencies.tax]]
+modId = "forge"
+mandatory = true
+versionRange = "[36,)"
+ordering = "NONE"
+side = "BOTH"
+[[dependencies.tax]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.16.5,1.17)"
+ordering = "NONE"
+side = "BOTH"
