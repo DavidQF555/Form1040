@@ -14,12 +14,17 @@ public class ServerConfigs {
         SPEC = pair.getRight();
     }
 
-    public final ForgeConfigSpec.ConfigValue<Double> taxRate;
+    public final ForgeConfigSpec.ConfigValue<Double> taxRate, taxCollectorRate;
+    public final ForgeConfigSpec.ConfigValue<Integer> punishAmt;
 
     public ServerConfigs(ForgeConfigSpec.Builder builder) {
         builder.push("Server config for Tax mod");
         taxRate = builder.comment("This is the proportion of each item in players' inventories that is taxed. ")
                 .defineInRange("rate", 0.1, 0, Double.MAX_VALUE);
+        taxCollectorRate = builder.comment("This is the chance that a Tax Collector spawns near players every day. ")
+                .defineInRange("spawnRate", 0.5, 0, 1);
+        punishAmt = builder.comment("This is the number of different taxed items for each player that are required for Tax Collectors to attack them. ")
+                .defineInRange("punish", 5, 0, Integer.MAX_VALUE);
         builder.pop();
     }
 }

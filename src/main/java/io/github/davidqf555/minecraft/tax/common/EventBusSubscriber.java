@@ -3,6 +3,7 @@ package io.github.davidqf555.minecraft.tax.common;
 import io.github.davidqf555.minecraft.tax.common.entities.TaxCollectorEntity;
 import io.github.davidqf555.minecraft.tax.common.packets.OpenTaxScreenPacket;
 import io.github.davidqf555.minecraft.tax.common.packets.PayTaxesPacket;
+import io.github.davidqf555.minecraft.tax.common.packets.StopPayingPacket;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
@@ -38,7 +39,15 @@ public final class EventBusSubscriber {
         @SubscribeEvent
         public static void onWorldTick(TickEvent.WorldTickEvent event) {
             if (event.phase == TickEvent.Phase.END && event.world instanceof ServerWorld && !event.world.dimensionType().hasFixedTime() && event.world.getDayTime() % 24000 == 0) {
-                event.world.players().forEach(Debt::add);
+                event.world.players().forEach(player -> {
+                    Debt.add(player);
+                    int size = Debt.get(player).getAllDebt().size();
+                    for (int i = 0; i < size / 3 + 1; i++) {
+                        if (event.world.getRandom().nextDouble() < ServerConfigs.INSTANCE.taxCollectorRate.get()) {
+                            TaxCollectorEntity.spawnNear(player, 8);
+                        }
+                    }
+                });
             }
         }
     }
@@ -55,6 +64,7 @@ public final class EventBusSubscriber {
             event.enqueueWork(() -> {
                 OpenTaxScreenPacket.register(0);
                 PayTaxesPacket.register(1);
+                StopPayingPacket.register(2);
             });
         }
 

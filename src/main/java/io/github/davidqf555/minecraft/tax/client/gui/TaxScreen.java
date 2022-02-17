@@ -3,6 +3,7 @@ package io.github.davidqf555.minecraft.tax.client.gui;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import io.github.davidqf555.minecraft.tax.common.Tax;
 import io.github.davidqf555.minecraft.tax.common.packets.PayTaxesPacket;
+import io.github.davidqf555.minecraft.tax.common.packets.StopPayingPacket;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
@@ -15,6 +16,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
+import java.util.UUID;
+
 public class TaxScreen extends Screen {
 
     private static final ITextComponent TITLE = new TranslationTextComponent("gui." + Tax.MOD_ID + ".tax_screen"), PAY = new TranslationTextComponent("gui." + Tax.MOD_ID + ".tax_screen.pay");
@@ -22,12 +25,14 @@ public class TaxScreen extends Screen {
     private static final int TEXTURE_WIDTH = 176, TEXTURE_HEIGHT = 184, X_SIZE = 176, Y_SIZE = 166, SLOT_WIDTH = 18, SLOT_HEIGHT = 18;
     private final Slot[] items;
     private final boolean canPay;
+    private final UUID collector;
     private int x, y;
 
-    public TaxScreen(NonNullList<ItemStack> items, boolean canPay) {
+    public TaxScreen(NonNullList<ItemStack> items, boolean canPay, UUID collector) {
         super(TITLE);
         this.items = items.stream().map(item -> new Slot(item, 0, 0, SLOT_WIDTH, SLOT_HEIGHT)).toArray(Slot[]::new);
         this.canPay = canPay;
+        this.collector = collector;
     }
 
     @Override
@@ -71,6 +76,12 @@ public class TaxScreen extends Screen {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+        Tax.CHANNEL.sendToServer(new StopPayingPacket(collector));
     }
 
     private class Slot extends Widget {
