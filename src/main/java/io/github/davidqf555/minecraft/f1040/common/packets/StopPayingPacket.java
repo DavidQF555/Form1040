@@ -1,7 +1,7 @@
-package io.github.davidqf555.minecraft.tax.common.packets;
+package io.github.davidqf555.minecraft.f1040.common.packets;
 
-import io.github.davidqf555.minecraft.tax.common.Tax;
-import io.github.davidqf555.minecraft.tax.common.entities.TaxCollectorEntity;
+import io.github.davidqf555.minecraft.f1040.common.Form1040;
+import io.github.davidqf555.minecraft.f1040.common.entities.TaxCollectorEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -27,7 +27,7 @@ public class StopPayingPacket {
     }
 
     public static void register(int index) {
-        Tax.CHANNEL.registerMessage(index, StopPayingPacket.class, ENCODER, DECODER, CONSUMER);
+        Form1040.CHANNEL.registerMessage(index, StopPayingPacket.class, ENCODER, DECODER, CONSUMER);
     }
 
     private void handle(NetworkEvent.Context context) {

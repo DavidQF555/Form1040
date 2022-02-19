@@ -1,4 +1,4 @@
-package io.github.davidqf555.minecraft.tax.common;
+package io.github.davidqf555.minecraft.f1040.common;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.ItemStackHelper;

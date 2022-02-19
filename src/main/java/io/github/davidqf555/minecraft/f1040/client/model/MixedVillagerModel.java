@@ -1,4 +1,4 @@
-package io.github.davidqf555.minecraft.tax.client.model;
+package io.github.davidqf555.minecraft.f1040.client.model;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;

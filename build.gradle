@@ -11,9 +11,9 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.16.5-1.0.1'
-group = 'io.github.davidqf555.minecraft.tax'
-archivesBaseName = 'tax'
+version = '1.16.5-1.0.0'
+group = 'io.github.davidqf555.minecraft.f1040'
+archivesBaseName = 'f1040'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
@@ -30,7 +30,7 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             mods {
-                tax {
+                f1040 {
                     source sourceSets.main
                 }
             }
@@ -41,7 +41,7 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             mods {
-                tax {
+                f1040 {
                     source sourceSets.main
                 }
             }
@@ -52,9 +52,9 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            args '--mod', 'tax', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', 'f1040', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
             mods {
-                tax {
+                f1040 {
                     source sourceSets.main
                 }
             }
@@ -72,7 +72,7 @@ dependencies {
 jar {
     manifest {
         attributes([
-                "Specification-Title"     : "Tax",
+                "Specification-Title"     : "Form 1040",
                 "Specification-Vendor"    : "DavidQF555",
                 "Specification-Version"   : "1",
                 "Implementation-Title"    : project.name,

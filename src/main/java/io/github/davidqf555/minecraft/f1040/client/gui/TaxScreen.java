@@ -1,9 +1,9 @@
-package io.github.davidqf555.minecraft.tax.client.gui;
+package io.github.davidqf555.minecraft.f1040.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import io.github.davidqf555.minecraft.tax.common.Tax;
-import io.github.davidqf555.minecraft.tax.common.packets.PayTaxesPacket;
-import io.github.davidqf555.minecraft.tax.common.packets.StopPayingPacket;
+import io.github.davidqf555.minecraft.f1040.common.Form1040;
+import io.github.davidqf555.minecraft.f1040.common.packets.PayTaxesPacket;
+import io.github.davidqf555.minecraft.f1040.common.packets.StopPayingPacket;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
@@ -20,8 +20,8 @@ import java.util.UUID;
 
 public class TaxScreen extends Screen {
 
-    private static final ITextComponent TITLE = new TranslationTextComponent("gui." + Tax.MOD_ID + ".tax_screen"), PAY = new TranslationTextComponent("gui." + Tax.MOD_ID + ".tax_screen.pay");
-    private static final ResourceLocation TEXTURE = new ResourceLocation(Tax.MOD_ID, "textures/gui/tax_screen.png");
+    private static final ITextComponent TITLE = new TranslationTextComponent("gui." + Form1040.MOD_ID + ".tax_screen"), PAY = new TranslationTextComponent("gui." + Form1040.MOD_ID + ".tax_screen.pay");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(Form1040.MOD_ID, "textures/gui/tax_screen.png");
     private static final int TEXTURE_WIDTH = 176, TEXTURE_HEIGHT = 184, X_SIZE = 176, Y_SIZE = 166, SLOT_WIDTH = 18, SLOT_HEIGHT = 18;
     private final Slot[] items;
     private final boolean canPay;
@@ -81,7 +81,7 @@ public class TaxScreen extends Screen {
     @Override
     public void onClose() {
         super.onClose();
-        Tax.CHANNEL.sendToServer(new StopPayingPacket(collector));
+        Form1040.CHANNEL.sendToServer(new StopPayingPacket(collector));
     }
 
     private class Slot extends Widget {
@@ -111,7 +111,7 @@ public class TaxScreen extends Screen {
         public PayButton(int x, int y, int width, int height) {
             super(x, y, width, height, PAY, button -> {
                 if (TaxScreen.this.canPay) {
-                    Tax.CHANNEL.sendToServer(new PayTaxesPacket());
+                    Form1040.CHANNEL.sendToServer(new PayTaxesPacket());
                     TaxScreen.this.onClose();
                 }
             });

@@ -1,4 +1,4 @@
-package io.github.davidqf555.minecraft.tax.common;
+package io.github.davidqf555.minecraft.f1040.common;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -12,8 +12,8 @@ import java.util.Collection;
 
 public final class TaxCommand {
 
-    private static final String ADD = "commands." + Tax.MOD_ID + ".add";
-    private static final String CLEAR = "commands." + Tax.MOD_ID + ".clear";
+    private static final String ADD = "commands." + Form1040.MOD_ID + ".add";
+    private static final String CLEAR = "commands." + Form1040.MOD_ID + ".clear";
 
     private TaxCommand() {
     }

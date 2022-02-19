@@ -1,7 +1,0 @@
-{
-  "entity.tax.tax_collector": "Tax Collector",
-  "gui.tax.tax_screen": "Tax",
-  "gui.tax.tax_screen.pay": "Pay",
-  "commands.tax.add": "Taxed %s targets",
-  "commands.tax.clear": "Cleared debt of %s targets"
-}

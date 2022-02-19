@@ -1,9 +1,9 @@
-package io.github.davidqf555.minecraft.tax.client.render;
+package io.github.davidqf555.minecraft.f1040.client.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import io.github.davidqf555.minecraft.tax.client.model.MixedVillagerModel;
-import io.github.davidqf555.minecraft.tax.common.Tax;
-import io.github.davidqf555.minecraft.tax.common.entities.TaxCollectorEntity;
+import io.github.davidqf555.minecraft.f1040.client.model.MixedVillagerModel;
+import io.github.davidqf555.minecraft.f1040.common.Form1040;
+import io.github.davidqf555.minecraft.f1040.common.entities.TaxCollectorEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.MobRenderer;
@@ -12,7 +12,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class TaxCollectorRenderer extends MobRenderer<TaxCollectorEntity, MixedVillagerModel<TaxCollectorEntity>> {
 
-    private static final ResourceLocation TEXTURE = new ResourceLocation(Tax.MOD_ID, "textures/entity/tax_collector.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(Form1040.MOD_ID, "textures/entity/tax_collector.png");
 
     public TaxCollectorRenderer(EntityRendererManager manager) {
         super(manager, new MixedVillagerModel<>(0), 0.5f);

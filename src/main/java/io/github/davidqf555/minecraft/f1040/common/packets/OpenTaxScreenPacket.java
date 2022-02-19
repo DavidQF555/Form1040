@@ -1,7 +1,7 @@
-package io.github.davidqf555.minecraft.tax.common.packets;
+package io.github.davidqf555.minecraft.f1040.common.packets;
 
-import io.github.davidqf555.minecraft.tax.client.gui.TaxScreen;
-import io.github.davidqf555.minecraft.tax.common.Tax;
+import io.github.davidqf555.minecraft.f1040.client.gui.TaxScreen;
+import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
@@ -42,7 +42,7 @@ public class OpenTaxScreenPacket {
     }
 
     public static void register(int index) {
-        Tax.CHANNEL.registerMessage(index, OpenTaxScreenPacket.class, ENCODER, DECODER, CONSUMER);
+        Form1040.CHANNEL.registerMessage(index, OpenTaxScreenPacket.class, ENCODER, DECODER, CONSUMER);
     }
 
     private void handle(NetworkEvent.Context context) {

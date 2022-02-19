@@ -1,9 +1,9 @@
-package io.github.davidqf555.minecraft.tax.common;
+package io.github.davidqf555.minecraft.f1040.common;
 
-import io.github.davidqf555.minecraft.tax.common.entities.TaxCollectorEntity;
-import io.github.davidqf555.minecraft.tax.common.packets.OpenTaxScreenPacket;
-import io.github.davidqf555.minecraft.tax.common.packets.PayTaxesPacket;
-import io.github.davidqf555.minecraft.tax.common.packets.StopPayingPacket;
+import io.github.davidqf555.minecraft.f1040.common.entities.TaxCollectorEntity;
+import io.github.davidqf555.minecraft.f1040.common.packets.OpenTaxScreenPacket;
+import io.github.davidqf555.minecraft.f1040.common.packets.PayTaxesPacket;
+import io.github.davidqf555.minecraft.f1040.common.packets.StopPayingPacket;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -24,10 +24,10 @@ public final class EventBusSubscriber {
     private EventBusSubscriber() {
     }
 
-    @Mod.EventBusSubscriber(modid = Tax.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+    @Mod.EventBusSubscriber(modid = Form1040.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static final class ForgeBus {
 
-        private static final ResourceLocation DEBT = new ResourceLocation(Tax.MOD_ID, "debt");
+        private static final ResourceLocation DEBT = new ResourceLocation(Form1040.MOD_ID, "debt");
 
         private ForgeBus() {
         }
@@ -71,7 +71,7 @@ public final class EventBusSubscriber {
         }
     }
 
-    @Mod.EventBusSubscriber(modid = Tax.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    @Mod.EventBusSubscriber(modid = Form1040.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static final class ModBus {
 
         private ModBus() {

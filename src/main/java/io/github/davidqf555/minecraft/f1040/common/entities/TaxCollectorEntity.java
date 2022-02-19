@@ -1,10 +1,10 @@
-package io.github.davidqf555.minecraft.tax.common.entities;
+package io.github.davidqf555.minecraft.f1040.common.entities;
 
-import io.github.davidqf555.minecraft.tax.common.Debt;
-import io.github.davidqf555.minecraft.tax.common.RegistryHandler;
-import io.github.davidqf555.minecraft.tax.common.ServerConfigs;
-import io.github.davidqf555.minecraft.tax.common.Tax;
-import io.github.davidqf555.minecraft.tax.common.packets.OpenTaxScreenPacket;
+import io.github.davidqf555.minecraft.f1040.common.Debt;
+import io.github.davidqf555.minecraft.f1040.common.Form1040;
+import io.github.davidqf555.minecraft.f1040.common.RegistryHandler;
+import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
+import io.github.davidqf555.minecraft.f1040.common.packets.OpenTaxScreenPacket;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -85,7 +85,7 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
             });
             if (!tax.isEmpty()) {
                 setTradingPlayer(player);
-                Tax.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new OpenTaxScreenPacket(tax, Debt.canPay(player), getUUID()));
+                Form1040.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new OpenTaxScreenPacket(tax, Debt.canPay(player), getUUID()));
                 return ActionResultType.SUCCESS;
             }
         }

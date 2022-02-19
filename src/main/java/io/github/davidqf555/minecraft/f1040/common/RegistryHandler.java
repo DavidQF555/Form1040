@@ -1,6 +1,6 @@
-package io.github.davidqf555.minecraft.tax.common;
+package io.github.davidqf555.minecraft.f1040.common;
 
-import io.github.davidqf555.minecraft.tax.common.entities.TaxCollectorEntity;
+import io.github.davidqf555.minecraft.f1040.common.entities.TaxCollectorEntity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
@@ -10,10 +10,10 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
-@Mod.EventBusSubscriber(modid = Tax.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid = Form1040.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class RegistryHandler {
 
-    public static final RegistryObject<EntityType<TaxCollectorEntity>> TAX_COLLECTOR_ENTITY = RegistryObject.of(new ResourceLocation(Tax.MOD_ID, "tax_collector"), ForgeRegistries.ENTITIES);
+    public static final RegistryObject<EntityType<TaxCollectorEntity>> TAX_COLLECTOR_ENTITY = RegistryObject.of(new ResourceLocation(Form1040.MOD_ID, "tax_collector"), ForgeRegistries.ENTITIES);
 
     private RegistryHandler() {
     }
