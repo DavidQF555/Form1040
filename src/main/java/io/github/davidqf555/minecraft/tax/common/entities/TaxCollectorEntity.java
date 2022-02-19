@@ -64,13 +64,13 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(0, new SwimGoal(this));
-        this.goalSelector.addGoal(1, new LookAtPayerGoal());
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1, true));
-        this.goalSelector.addGoal(3, new LookAtGoal(this, PlayerEntity.class, 6));
-        this.goalSelector.addGoal(4, new LookRandomlyGoal(this));
-        this.targetSelector.addGoal(0, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, 10, true, false, player -> Debt.get((PlayerEntity) player).getAllDebt().size() >= ServerConfigs.INSTANCE.punishAmt.get()));
+        goalSelector.addGoal(0, new SwimGoal(this));
+        goalSelector.addGoal(1, new LookAtPayerGoal());
+        goalSelector.addGoal(2, new MeleeAttackGoal(this, 1, true));
+        goalSelector.addGoal(3, new LookAtGoal(this, PlayerEntity.class, 6));
+        goalSelector.addGoal(4, new LookRandomlyGoal(this));
+        targetSelector.addGoal(0, new HurtByTargetGoal(this));
+        targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, 10, true, false, player -> Debt.get((PlayerEntity) player).getAllDebt().size() >= ServerConfigs.INSTANCE.punishAmt.get()));
     }
 
     @Override
@@ -99,6 +99,14 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
 
     public void setTradingPlayer(@Nullable PlayerEntity player) {
         trading = player;
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (tickCount >= ServerConfigs.INSTANCE.taxPeriod.get()) {
+            remove();
+        }
     }
 
     public static class Factory implements EntityType.IFactory<TaxCollectorEntity> {

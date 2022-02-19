@@ -73,7 +73,7 @@ public class Debt implements INBTSerializable<CompoundNBT> {
     public static boolean canPay(PlayerEntity player) {
         Debt debt = get(player);
         for (Item item : debt.getAllDebt()) {
-            if (ItemStackHelper.clearOrCountMatchingItems(player.inventory, stack -> stack.getItem().equals(item), 0, true) < debt.getDebt(item)) {
+            if (!debt.canPay(player, item)) {
                 return false;
             }
         }
@@ -94,6 +94,10 @@ public class Debt implements INBTSerializable<CompoundNBT> {
 
     public void clear() {
         debt.clear();
+    }
+
+    public boolean canPay(PlayerEntity player, Item item) {
+        return ItemStackHelper.clearOrCountMatchingItems(player.inventory, stack -> stack.getItem().equals(item), 0, true) >= getDebt(item);
     }
 
     @Override
