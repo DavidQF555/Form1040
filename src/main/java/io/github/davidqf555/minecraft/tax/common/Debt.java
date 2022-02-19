@@ -31,7 +31,7 @@ public class Debt implements INBTSerializable<CompoundNBT> {
         return player.getCapability(Provider.capability).orElseGet(Debt::new);
     }
 
-    public static void add(PlayerEntity player) {
+    public static boolean add(PlayerEntity player) {
         Map<Item, Integer> unique = new HashMap<>();
         for (ItemStack stack : player.inventory.items) {
             if (!stack.isEmpty()) {
@@ -42,7 +42,9 @@ public class Debt implements INBTSerializable<CompoundNBT> {
         if (!unique.isEmpty()) {
             Item rand = new ArrayList<>(unique.keySet()).get(player.getRandom().nextInt(unique.size()));
             get(player).addDebt(rand, MathHelper.ceil(unique.get(rand) * ServerConfigs.INSTANCE.taxRate.get()));
+            return true;
         }
+        return false;
     }
 
     public static void pay(PlayerEntity player) {
