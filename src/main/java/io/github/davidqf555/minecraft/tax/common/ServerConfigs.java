@@ -16,6 +16,8 @@ public class ServerConfigs {
 
     public final ForgeConfigSpec.ConfigValue<Double> taxRate, taxCollectorRate;
     public final ForgeConfigSpec.ConfigValue<Integer> punishAmt;
+    public final ForgeConfigSpec.ConfigValue<Boolean> roundUp, persistent;
+    public final ForgeConfigSpec.ConfigValue<Long> taxPeriod;
 
     public ServerConfigs(ForgeConfigSpec.Builder builder) {
         builder.push("Server config for Tax mod");
@@ -25,6 +27,12 @@ public class ServerConfigs {
                 .defineInRange("spawnRate", 0.5, 0, 1);
         punishAmt = builder.comment("This is the number of different taxed items for each player that are required for Tax Collectors to attack them. ")
                 .defineInRange("punish", 5, 0, Integer.MAX_VALUE);
+        roundUp = builder.comment("This is whether the number of items taxed is rounded up. ")
+                .define("roundUp", true);
+        persistent = builder.comment("This is whether debt remains after death. ")
+                .define("persistent", true);
+        taxPeriod = builder.comment("This is the period in between the time that players are taxed. ")
+                .defineInRange("period", 24000, 1, Long.MAX_VALUE);
         builder.pop();
     }
 }

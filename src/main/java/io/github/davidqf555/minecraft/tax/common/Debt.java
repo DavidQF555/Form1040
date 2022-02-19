@@ -40,9 +40,24 @@ public class Debt implements INBTSerializable<CompoundNBT> {
             }
         }
         if (!unique.isEmpty()) {
-            Item rand = new ArrayList<>(unique.keySet()).get(player.getRandom().nextInt(unique.size()));
-            get(player).addDebt(rand, MathHelper.ceil(unique.get(rand) * ServerConfigs.INSTANCE.taxRate.get()));
-            return true;
+            double rate = ServerConfigs.INSTANCE.taxCollectorRate.get();
+            if (ServerConfigs.INSTANCE.roundUp.get()) {
+                Item rand = new ArrayList<>(unique.keySet()).get(player.getRandom().nextInt(unique.size()));
+                get(player).addDebt(rand, MathHelper.ceil(unique.get(rand) * rate));
+                return true;
+            }
+            Map<Item, Integer> tax = new HashMap<>();
+            for (Map.Entry<Item, Integer> entry : unique.entrySet()) {
+                int total = (int) (entry.getValue() * rate);
+                if (total >= 1) {
+                    tax.put(entry.getKey(), total);
+                }
+            }
+            if (!tax.isEmpty()) {
+                Item rand = new ArrayList<>(tax.keySet()).get(player.getRandom().nextInt(tax.size()));
+                get(player).addDebt(rand, tax.get(rand));
+                return true;
+            }
         }
         return false;
     }

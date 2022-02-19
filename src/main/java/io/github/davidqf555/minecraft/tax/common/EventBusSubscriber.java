@@ -6,6 +6,7 @@ import io.github.davidqf555.minecraft.tax.common.packets.PayTaxesPacket;
 import io.github.davidqf555.minecraft.tax.common.packets.StopPayingPacket;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -13,6 +14,7 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -35,6 +37,14 @@ public final class EventBusSubscriber {
             TaxCommand.register(event.getDispatcher());
         }
 
+        @SubscribeEvent
+        public static void onClonePlayerEvent(PlayerEvent.Clone event) {
+            if (ServerConfigs.INSTANCE.persistent.get() && event.isWasDeath()) {
+                ServerPlayerEntity original = (ServerPlayerEntity) event.getOriginal();
+                ServerPlayerEntity resp = (ServerPlayerEntity) event.getPlayer();
+                Debt.get(resp).deserializeNBT(Debt.get(original).serializeNBT());
+            }
+        }
 
         @SubscribeEvent
         public static void onAttachPlayerCapabilities(AttachCapabilitiesEvent<Entity> event) {
@@ -45,13 +55,15 @@ public final class EventBusSubscriber {
 
         @SubscribeEvent
         public static void onWorldTick(TickEvent.WorldTickEvent event) {
-            if (event.phase == TickEvent.Phase.END && event.world instanceof ServerWorld && !event.world.dimensionType().hasFixedTime() && event.world.getDayTime() % 24000 == 0) {
+            if (event.phase == TickEvent.Phase.END && event.world instanceof ServerWorld && !event.world.dimensionType().hasFixedTime() && event.world.getDayTime() % ServerConfigs.INSTANCE.taxPeriod.get() == 0) {
                 event.world.players().forEach(player -> {
-                    Debt.add(player);
-                    int size = Debt.get(player).getAllDebt().size();
-                    for (int i = 0; i < size / 3 + 1; i++) {
-                        if (event.world.getRandom().nextDouble() < ServerConfigs.INSTANCE.taxCollectorRate.get()) {
-                            TaxCollectorEntity.spawnNear(player, 8);
+                    if (!player.isCreative() && !player.isSpectator()) {
+                        Debt.add(player);
+                        int size = Debt.get(player).getAllDebt().size();
+                        for (int i = 0; i < size / 3 + 1; i++) {
+                            if (event.world.getRandom().nextDouble() < ServerConfigs.INSTANCE.taxCollectorRate.get()) {
+                                TaxCollectorEntity.spawnNear(player, 8);
+                            }
                         }
                     }
                 });
