@@ -24,6 +24,7 @@ public class TaxCollectorRenderer extends MobRenderer<TaxCollectorEntity, MixedV
                 }
             }
         });
+        addLayer(new UniformLayerRenderer(this));
     }
 
     @Override

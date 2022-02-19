@@ -14,15 +14,17 @@ public class MixedVillagerModel<T extends MobEntity> extends VillagerModel<T> im
     private final ModelRenderer leftArm, rightArm;
 
     public MixedVillagerModel(float offset) {
-        this(offset, 64, 64);
+        this(offset, 80, 64);
     }
 
     public MixedVillagerModel(float offset, int texWidth, int texHeight) {
-        super(offset);
-        rightArm = new ModelRenderer(this, 40, 46).setTexSize(texWidth, texHeight);
+        super(offset, texWidth, texHeight);
+        this.texWidth = texWidth;
+        this.texHeight = texHeight;
+        rightArm = new ModelRenderer(this, 64, 0);
         rightArm.addBox(-3, -2, -2, 4, 12, 4, offset);
         rightArm.setPos(-5, 2, 0);
-        leftArm = new ModelRenderer(this, 40, 46).setTexSize(texWidth, texHeight);
+        leftArm = new ModelRenderer(this, 64, 0);
         leftArm.addBox(-1, -2, -2, 4, 12, 4, offset);
         leftArm.setPos(5, 2, 0);
         leftArm.mirror = true;
