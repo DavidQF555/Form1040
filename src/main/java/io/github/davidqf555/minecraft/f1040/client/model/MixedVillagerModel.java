@@ -1,38 +1,45 @@
 package io.github.davidqf555.minecraft.f1040.client.model;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.entity.model.IHasArm;
-import net.minecraft.client.renderer.entity.model.VillagerModel;
-import net.minecraft.client.renderer.model.ModelHelper;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.util.HandSide;
+import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.davidqf555.minecraft.f1040.common.RegistryHandler;
+import net.minecraft.client.model.AnimationUtils;
+import net.minecraft.client.model.ArmedModel;
+import net.minecraft.client.model.VillagerModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.Mob;
 
-public class MixedVillagerModel<T extends MobEntity> extends VillagerModel<T> implements IHasArm {
+public class MixedVillagerModel<T extends Mob> extends VillagerModel<T> implements ArmedModel {
 
-    private final ModelRenderer leftArm, rightArm;
+    public static final ModelLayerLocation LOCATION = new ModelLayerLocation(RegistryHandler.TAX_COLLECTOR_ENTITY.getId(), "main");
+    private final ModelPart leftArm, rightArm, arms;
 
-    public MixedVillagerModel(float offset) {
-        this(offset, 80, 64);
+    public MixedVillagerModel(ModelPart part) {
+        super(part);
+        arms = part.getChild("arms");
+        rightArm = part.getChild("right_arm");
+        leftArm = part.getChild("left_arm");
     }
 
-    public MixedVillagerModel(float offset, int texWidth, int texHeight) {
-        super(offset, texWidth, texHeight);
-        this.texWidth = texWidth;
-        this.texHeight = texHeight;
-        rightArm = new ModelRenderer(this, 64, 0);
-        rightArm.addBox(-3, -2, -2, 4, 12, 4, offset);
-        rightArm.setPos(-5, 2, 0);
-        leftArm = new ModelRenderer(this, 64, 0);
-        leftArm.addBox(-1, -2, -2, 4, 12, 4, offset);
-        leftArm.setPos(5, 2, 0);
-        leftArm.mirror = true;
-    }
-
-    @Override
-    public Iterable<ModelRenderer> parts() {
-        return new ImmutableList.Builder<ModelRenderer>().addAll(super.parts()).add(leftArm, rightArm).build();
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshdefinition = createBodyModel();
+        PartDefinition partdefinition = meshdefinition.getRoot();
+        partdefinition.addOrReplaceChild("right_arm", CubeListBuilder.create()
+                .texOffs(64, 0)
+                .addBox(-3, -2, -2, 4, 12, 4), PartPose.offset(-5, 2, 0)
+        );
+        partdefinition.addOrReplaceChild("left_arm", CubeListBuilder.create()
+                .texOffs(64, 0)
+                .mirror()
+                .addBox(-1, -2, -2, 4, 12, 4), PartPose.offset(5, 2, 0)
+        );
+        return LayerDefinition.create(meshdefinition, 80, 64);
     }
 
     @Override
@@ -40,9 +47,9 @@ public class MixedVillagerModel<T extends MobEntity> extends VillagerModel<T> im
         super.setupAnim(entity, p_225597_2_, p_225597_3_, p_225597_4_, p_225597_5_, p_225597_6_);
         boolean aggressive = entity.isAggressive();
         if (entity.getMainHandItem().isEmpty()) {
-            ModelHelper.animateZombieArms(this.leftArm, this.rightArm, true, this.attackTime, p_225597_4_);
+            AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, true, this.attackTime, p_225597_4_);
         } else {
-            ModelHelper.swingWeaponDown(this.rightArm, this.leftArm, entity, this.attackTime, p_225597_4_);
+            AnimationUtils.swingWeaponDown(this.rightArm, this.leftArm, entity, this.attackTime, p_225597_4_);
         }
         this.arms.visible = !aggressive;
         this.leftArm.visible = aggressive;
@@ -50,7 +57,7 @@ public class MixedVillagerModel<T extends MobEntity> extends VillagerModel<T> im
     }
 
     @Override
-    public void translateToHand(HandSide hand, MatrixStack matrix) {
-        (hand == HandSide.LEFT ? leftArm : rightArm).translateAndRotate(matrix);
+    public void translateToHand(HumanoidArm hand, PoseStack matrix) {
+        (hand == HumanoidArm.LEFT ? leftArm : rightArm).translateAndRotate(matrix);
     }
 }

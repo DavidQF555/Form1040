@@ -2,11 +2,11 @@ package io.github.davidqf555.minecraft.f1040.common.packets;
 
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import io.github.davidqf555.minecraft.f1040.common.entities.TaxCollectorEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.UUID;
 import java.util.function.BiConsumer;
@@ -15,10 +15,10 @@ import java.util.function.Supplier;
 
 public class StopPayingPacket {
 
-    private static final BiConsumer<StopPayingPacket, PacketBuffer> ENCODER = (packet, buffer) -> {
+    private static final BiConsumer<StopPayingPacket, FriendlyByteBuf> ENCODER = (packet, buffer) -> {
         buffer.writeUUID(packet.collector);
     };
-    private static final Function<PacketBuffer, StopPayingPacket> DECODER = buffer -> new StopPayingPacket(buffer.readUUID());
+    private static final Function<FriendlyByteBuf, StopPayingPacket> DECODER = buffer -> new StopPayingPacket(buffer.readUUID());
     private static final BiConsumer<StopPayingPacket, Supplier<NetworkEvent.Context>> CONSUMER = (packet, context) -> packet.handle(context.get());
     private final UUID collector;
 
@@ -32,7 +32,7 @@ public class StopPayingPacket {
 
     private void handle(NetworkEvent.Context context) {
         if (context.getDirection() == NetworkDirection.PLAY_TO_SERVER) {
-            ServerPlayerEntity player = context.getSender();
+            ServerPlayer player = context.getSender();
             context.enqueueWork(() -> {
                 Entity collector = player.getLevel().getEntity(this.collector);
                 if (collector instanceof TaxCollectorEntity) {

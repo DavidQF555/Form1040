@@ -2,11 +2,11 @@ package io.github.davidqf555.minecraft.f1040.common;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
 
@@ -18,7 +18,7 @@ public final class TaxCommand {
     private TaxCommand() {
     }
 
-    public static void register(CommandDispatcher<CommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("tax")
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.argument("targets", EntityArgument.players())
@@ -35,13 +35,13 @@ public final class TaxCommand {
         );
     }
 
-    private static int add(CommandSource source, Collection<ServerPlayerEntity> targets) {
+    private static int add(CommandSourceStack source, Collection<ServerPlayer> targets) {
         return add(source, targets, 1);
     }
 
-    private static int add(CommandSource source, Collection<ServerPlayerEntity> targets, int amount) {
+    private static int add(CommandSourceStack source, Collection<ServerPlayer> targets, int amount) {
         int success = 0;
-        for (ServerPlayerEntity player : targets) {
+        for (ServerPlayer player : targets) {
             boolean added = false;
             for (int i = 0; i < amount; i++) {
                 if (Debt.add(player) && !added) {
@@ -50,16 +50,16 @@ public final class TaxCommand {
                 }
             }
         }
-        source.sendSuccess(new TranslationTextComponent(ADD, success), true);
+        source.sendSuccess(new TranslatableComponent(ADD, success), true);
         return success;
     }
 
-    private static int clear(CommandSource source, Collection<ServerPlayerEntity> targets) {
-        for (ServerPlayerEntity player : targets) {
+    private static int clear(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        for (ServerPlayer player : targets) {
             Debt.get(player).clear();
         }
         int size = targets.size();
-        source.sendSuccess(new TranslationTextComponent(CLEAR, size), true);
+        source.sendSuccess(new TranslatableComponent(CLEAR, size), true);
         return size;
     }
 }

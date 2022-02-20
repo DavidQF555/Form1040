@@ -2,10 +2,10 @@ package io.github.davidqf555.minecraft.f1040.common.packets;
 
 import io.github.davidqf555.minecraft.f1040.common.Debt;
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -13,9 +13,9 @@ import java.util.function.Supplier;
 
 public class PayTaxesPacket {
 
-    private static final BiConsumer<PayTaxesPacket, PacketBuffer> ENCODER = (packet, buffer) -> {
+    private static final BiConsumer<PayTaxesPacket, FriendlyByteBuf> ENCODER = (packet, buffer) -> {
     };
-    private static final Function<PacketBuffer, PayTaxesPacket> DECODER = buffer -> new PayTaxesPacket();
+    private static final Function<FriendlyByteBuf, PayTaxesPacket> DECODER = buffer -> new PayTaxesPacket();
     private static final BiConsumer<PayTaxesPacket, Supplier<NetworkEvent.Context>> CONSUMER = (packet, context) -> packet.handle(context.get());
 
     public static void register(int index) {
@@ -24,7 +24,7 @@ public class PayTaxesPacket {
 
     private void handle(NetworkEvent.Context context) {
         if (context.getDirection() == NetworkDirection.PLAY_TO_SERVER) {
-            ServerPlayerEntity player = context.getSender();
+            ServerPlayer player = context.getSender();
             context.enqueueWork(() -> {
                 if (Debt.canPay(player)) {
                     Debt.pay(player);

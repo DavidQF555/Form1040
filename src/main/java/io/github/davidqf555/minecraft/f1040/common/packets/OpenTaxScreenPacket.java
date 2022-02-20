@@ -3,11 +3,11 @@ package io.github.davidqf555.minecraft.f1040.common.packets;
 import io.github.davidqf555.minecraft.f1040.client.gui.TaxScreen;
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.NonNullList;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.UUID;
 import java.util.function.BiConsumer;
@@ -16,13 +16,13 @@ import java.util.function.Supplier;
 
 public class OpenTaxScreenPacket {
 
-    private static final BiConsumer<OpenTaxScreenPacket, PacketBuffer> ENCODER = (packet, buffer) -> {
+    private static final BiConsumer<OpenTaxScreenPacket, FriendlyByteBuf> ENCODER = (packet, buffer) -> {
         buffer.writeInt(packet.items.size());
         packet.items.forEach(buffer::writeItem);
         buffer.writeBoolean(packet.canPay);
         buffer.writeUUID(packet.collector);
     };
-    private static final Function<PacketBuffer, OpenTaxScreenPacket> DECODER = buffer -> {
+    private static final Function<FriendlyByteBuf, OpenTaxScreenPacket> DECODER = buffer -> {
         int size = buffer.readInt();
         NonNullList<ItemStack> items = NonNullList.create();
         for (int i = 0; i < size; i++) {

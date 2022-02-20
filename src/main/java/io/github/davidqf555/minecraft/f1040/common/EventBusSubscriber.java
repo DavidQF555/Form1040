@@ -4,12 +4,17 @@ import io.github.davidqf555.minecraft.f1040.common.entities.TaxCollectorEntity;
 import io.github.davidqf555.minecraft.f1040.common.packets.OpenTaxScreenPacket;
 import io.github.davidqf555.minecraft.f1040.common.packets.PayTaxesPacket;
 import io.github.davidqf555.minecraft.f1040.common.packets.StopPayingPacket;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.capabilities.ICapabilitySerializable;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
@@ -18,6 +23,8 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class EventBusSubscriber {
 
@@ -40,22 +47,39 @@ public final class EventBusSubscriber {
         @SubscribeEvent
         public static void onClonePlayerEvent(PlayerEvent.Clone event) {
             if (ServerConfigs.INSTANCE.persistent.get() && event.isWasDeath()) {
-                ServerPlayerEntity original = (ServerPlayerEntity) event.getOriginal();
-                ServerPlayerEntity resp = (ServerPlayerEntity) event.getPlayer();
-                Debt.get(resp).deserializeNBT(Debt.get(original).serializeNBT());
+                Debt.get(event.getPlayer()).deserializeNBT(Debt.get(event.getOriginal()).serializeNBT());
             }
         }
 
         @SubscribeEvent
         public static void onAttachPlayerCapabilities(AttachCapabilitiesEvent<Entity> event) {
-            if (event.getObject() instanceof PlayerEntity) {
-                event.addCapability(DEBT, new Debt.Provider());
+            if (event.getObject() instanceof Player) {
+                Debt backend = new Debt();
+                LazyOptional<Debt> storage = LazyOptional.of(() -> backend);
+                ICapabilityProvider provider = new ICapabilitySerializable<CompoundTag>() {
+                    @NotNull
+                    @Override
+                    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+                        return cap == Debt.CAPABILITY ? storage.cast() : LazyOptional.empty();
+                    }
+
+                    @Override
+                    public CompoundTag serializeNBT() {
+                        return backend.serializeNBT();
+                    }
+
+                    @Override
+                    public void deserializeNBT(CompoundTag nbt) {
+                        backend.deserializeNBT(nbt);
+                    }
+                };
+                event.addCapability(DEBT, provider);
             }
         }
 
         @SubscribeEvent
         public static void onWorldTick(TickEvent.WorldTickEvent event) {
-            if (event.phase == TickEvent.Phase.END && event.world instanceof ServerWorld && !event.world.dimensionType().hasFixedTime() && event.world.getDayTime() % ServerConfigs.INSTANCE.taxPeriod.get() == 0) {
+            if (event.phase == TickEvent.Phase.END && event.world instanceof ServerLevel && !event.world.dimensionType().hasFixedTime() && event.world.getDayTime() % ServerConfigs.INSTANCE.taxPeriod.get() == 0) {
                 event.world.players().forEach(player -> {
                     if (!player.isCreative() && !player.isSpectator()) {
                         Debt.add(player);
@@ -78,8 +102,12 @@ public final class EventBusSubscriber {
         }
 
         @SubscribeEvent
+        public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
+            event.register(Debt.class);
+        }
+
+        @SubscribeEvent
         public static void onFMLCommonSetup(FMLCommonSetupEvent event) {
-            CapabilityManager.INSTANCE.register(Debt.class, new Debt.Storage(), Debt::new);
             event.enqueueWork(() -> {
                 OpenTaxScreenPacket.register(0);
                 PayTaxesPacket.register(1);
