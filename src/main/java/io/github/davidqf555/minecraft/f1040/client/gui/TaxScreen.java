@@ -6,8 +6,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import io.github.davidqf555.minecraft.f1040.common.packets.PayTaxesPacket;
 import io.github.davidqf555.minecraft.f1040.common.packets.StopPayingPacket;
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -115,15 +115,10 @@ public class TaxScreen extends Screen {
         }
     }
 
-    private class PayButton extends Button {
+    private class PayButton extends AbstractButton {
 
         public PayButton(int x, int y, int width, int height) {
-            super(x, y, width, height, PAY, button -> {
-                if (TaxScreen.this.canPay) {
-                    Form1040.CHANNEL.sendToServer(new PayTaxesPacket());
-                    TaxScreen.this.onClose();
-                }
-            });
+            super(x, y, width, height, PAY);
         }
 
         @Override
@@ -142,6 +137,19 @@ public class TaxScreen extends Screen {
             RenderSystem.setShaderTexture(0, TEXTURE);
             blit(matrix, x, y, xStart, 166, width, height, TEXTURE_WIDTH, TEXTURE_HEIGHT);
             drawCenteredString(matrix, font, getMessage(), x + width / 2, y + (height - font.lineHeight) / 2, color);
+        }
+
+        @Override
+        public void onPress() {
+            if (canPay) {
+                Form1040.CHANNEL.sendToServer(new PayTaxesPacket());
+                onClose();
+            }
+        }
+
+        @Override
+        public void updateNarration(NarrationElementOutput output) {
+            defaultButtonNarrationText(output);
         }
     }
 }

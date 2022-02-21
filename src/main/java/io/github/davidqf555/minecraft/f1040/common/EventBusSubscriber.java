@@ -1,14 +1,19 @@
 package io.github.davidqf555.minecraft.f1040.common;
 
+import io.github.davidqf555.minecraft.f1040.common.entities.TargetIndebtedGoal;
 import io.github.davidqf555.minecraft.f1040.common.entities.TaxCollectorEntity;
 import io.github.davidqf555.minecraft.f1040.common.packets.OpenTaxScreenPacket;
 import io.github.davidqf555.minecraft.f1040.common.packets.PayTaxesPacket;
 import io.github.davidqf555.minecraft.f1040.common.packets.StopPayingPacket;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -19,12 +24,14 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class EventBusSubscriber {
 
@@ -57,9 +64,9 @@ public final class EventBusSubscriber {
                 Debt backend = new Debt();
                 LazyOptional<Debt> storage = LazyOptional.of(() -> backend);
                 ICapabilityProvider provider = new ICapabilitySerializable<CompoundTag>() {
-                    @NotNull
+                    @Nonnull
                     @Override
-                    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+                    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
                         return cap == Debt.CAPABILITY ? storage.cast() : LazyOptional.empty();
                     }
 
@@ -78,15 +85,27 @@ public final class EventBusSubscriber {
         }
 
         @SubscribeEvent
+        public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
+            Entity entity = event.getEntity();
+            if (entity instanceof IronGolem) {
+                ((IronGolem) entity).targetSelector.addGoal(3, new TargetIndebtedGoal<>((Mob) entity, true));
+            }
+        }
+
+        @SubscribeEvent
         public static void onWorldTick(TickEvent.WorldTickEvent event) {
             if (event.phase == TickEvent.Phase.END && event.world instanceof ServerLevel && !event.world.dimensionType().hasFixedTime() && event.world.getDayTime() % ServerConfigs.INSTANCE.taxPeriod.get() == 0) {
                 event.world.players().forEach(player -> {
                     if (!player.isCreative() && !player.isSpectator()) {
-                        Debt.add(player);
-                        int size = Debt.get(player).getAllDebt().size();
-                        for (int i = 0; i < size / 3 + 1; i++) {
-                            if (event.world.getRandom().nextDouble() < ServerConfigs.INSTANCE.taxCollectorRate.get()) {
-                                TaxCollectorEntity.spawnNear(player, 8);
+                        if (ServerConfigs.INSTANCE.villageRange.get() == -1 || ((ServerLevel) event.world).sectionsToVillage(SectionPos.of(player)) <= SectionPos.blockToSection(ServerConfigs.INSTANCE.villageRange.get())) {
+                            Debt.add(player);
+                            int min = ServerConfigs.INSTANCE.taxCollectorMin.get();
+                            int max = ServerConfigs.INSTANCE.taxCollectorMax.get();
+                            TaxCollectorEntity.spawn(player, RegistryHandler.TAX_COLLECTOR_ENTITY.get(), min, max);
+                            if (Debt.isIndebted(player)) {
+                                for (int i = 0; i < ServerConfigs.INSTANCE.ironGolemCount.get(); i++) {
+                                    TaxCollectorEntity.spawn(player, EntityType.IRON_GOLEM, min, max);
+                                }
                             }
                         }
                     }

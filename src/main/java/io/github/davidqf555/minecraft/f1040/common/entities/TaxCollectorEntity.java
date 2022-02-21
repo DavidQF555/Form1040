@@ -10,10 +10,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -21,7 +18,6 @@ import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -50,17 +46,16 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
                 .add(Attributes.MOVEMENT_SPEED, 0.35F);
     }
 
-    public static void spawnNear(Player player, int range) {
+    public static <T extends LivingEntity> void spawn(Player player, EntityType<T> type, int min, int max) {
         BlockPos center = player.blockPosition();
         Random random = player.getRandom();
-        EntityType<TaxCollectorEntity> type = RegistryHandler.TAX_COLLECTOR_ENTITY.get();
         for (int i = 0; i < 10; i++) {
-            int j = center.getX() + random.nextInt(range * 2) - range;
-            int k = center.getZ() + random.nextInt(range * 2) - range;
-            int l = player.level.getHeight(Heightmap.Types.WORLD_SURFACE, j, k);
-            BlockPos pos = new BlockPos(j, l, k);
+            int x = center.getX() + (random.nextInt(max - min + 1) + min) * (random.nextBoolean() ? -1 : 1);
+            int z = center.getZ() + (random.nextInt(max - min + 1) + min) * (random.nextBoolean() ? -1 : 1);
+            int y = player.level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+            BlockPos pos = new BlockPos(x, y, z);
             if (NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, player.level, pos, type)) {
-                TaxCollectorEntity entity = type.create(player.level);
+                T entity = type.create(player.level);
                 if (entity != null) {
                     Vec3 vec = Vec3.atBottomCenterOf(pos);
                     entity.setPos(vec.x(), vec.y(), vec.z());
@@ -79,7 +74,7 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
         goalSelector.addGoal(3, new LookAtPlayerGoal(this, Player.class, 6));
         goalSelector.addGoal(4, new RandomLookAroundGoal(this));
         targetSelector.addGoal(0, new HurtByTargetGoal(this));
-        targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, player -> Debt.get((Player) player).getAllDebt().size() >= ServerConfigs.INSTANCE.punishAmt.get()));
+        targetSelector.addGoal(1, new TargetIndebtedGoal<>(this, true));
     }
 
     @Override

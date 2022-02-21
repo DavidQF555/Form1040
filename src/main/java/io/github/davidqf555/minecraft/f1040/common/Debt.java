@@ -32,6 +32,10 @@ public class Debt implements INBTSerializable<CompoundTag> {
         return player.getCapability(CAPABILITY).orElseGet(Debt::new);
     }
 
+    public static boolean isIndebted(Player player) {
+        return get(player).isIndebted();
+    }
+
     public static boolean add(Player player) {
         Map<Item, Integer> unique = new HashMap<>();
         for (ItemStack stack : player.getInventory().items) {
@@ -41,7 +45,7 @@ public class Debt implements INBTSerializable<CompoundTag> {
             }
         }
         if (!unique.isEmpty()) {
-            double rate = ServerConfigs.INSTANCE.taxCollectorRate.get();
+            double rate = ServerConfigs.INSTANCE.taxRate.get();
             if (ServerConfigs.INSTANCE.roundUp.get()) {
                 Item rand = List.copyOf(unique.keySet()).get(player.getRandom().nextInt(unique.size()));
                 get(player).addDebt(rand, Mth.ceil(unique.get(rand) * rate));
@@ -79,6 +83,10 @@ public class Debt implements INBTSerializable<CompoundTag> {
             }
         }
         return true;
+    }
+
+    public boolean isIndebted() {
+        return getAllDebt().size() >= ServerConfigs.INSTANCE.indebtedAmt.get();
     }
 
     public void addDebt(Item item, int amt) {
