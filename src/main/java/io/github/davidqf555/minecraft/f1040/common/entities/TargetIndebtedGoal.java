@@ -1,18 +1,18 @@
 package io.github.davidqf555.minecraft.f1040.common.entities;
 
 import io.github.davidqf555.minecraft.f1040.common.Debt;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.TargetGoal;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.EntityPredicates;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.target.TargetGoal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 
 import java.util.Comparator;
 import java.util.Optional;
 
-public class TargetIndebtedGoal<T extends MobEntity> extends TargetGoal {
+public class TargetIndebtedGoal<T extends Mob> extends TargetGoal {
 
-    private Optional<PlayerEntity> target;
+    private Optional<Player> target;
 
     public TargetIndebtedGoal(T mob, boolean mustSee) {
         super(mob, mustSee);
@@ -21,8 +21,8 @@ public class TargetIndebtedGoal<T extends MobEntity> extends TargetGoal {
 
     @Override
     public boolean canUse() {
-        AxisAlignedBB bounds = mob.getBoundingBox().inflate(getFollowDistance());
-        target = mob.level.getLoadedEntitiesOfClass(PlayerEntity.class, bounds, EntityPredicates.NO_CREATIVE_OR_SPECTATOR).stream().filter(Debt::isIndebted).min(Comparator.comparingDouble(mob::distanceToSqr));
+        AABB bounds = mob.getBoundingBox().inflate(getFollowDistance());
+        target = mob.level.getEntitiesOfClass(Player.class, bounds, EntitySelector.NO_CREATIVE_OR_SPECTATOR).stream().filter(Debt::isIndebted).min(Comparator.comparingDouble(mob::distanceToSqr));
         return target.isPresent();
     }
 
