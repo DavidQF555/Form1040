@@ -31,6 +31,10 @@ public class Debt implements INBTSerializable<CompoundNBT> {
         return player.getCapability(Provider.capability).orElseGet(Debt::new);
     }
 
+    public static boolean isIndebted(PlayerEntity player) {
+        return get(player).isIndebted();
+    }
+
     public static boolean add(PlayerEntity player) {
         Map<Item, Integer> unique = new HashMap<>();
         for (ItemStack stack : player.inventory.items) {
@@ -40,7 +44,7 @@ public class Debt implements INBTSerializable<CompoundNBT> {
             }
         }
         if (!unique.isEmpty()) {
-            double rate = ServerConfigs.INSTANCE.taxCollectorRate.get();
+            double rate = ServerConfigs.INSTANCE.taxRate.get();
             if (ServerConfigs.INSTANCE.roundUp.get()) {
                 Item rand = new ArrayList<>(unique.keySet()).get(player.getRandom().nextInt(unique.size()));
                 get(player).addDebt(rand, MathHelper.ceil(unique.get(rand) * rate));
@@ -78,6 +82,10 @@ public class Debt implements INBTSerializable<CompoundNBT> {
             }
         }
         return true;
+    }
+
+    public boolean isIndebted() {
+        return getAllDebt().size() >= ServerConfigs.INSTANCE.indebtedAmt.get();
     }
 
     public void addDebt(Item item, int amt) {

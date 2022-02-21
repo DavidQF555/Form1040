@@ -41,17 +41,16 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
                 .add(Attributes.MOVEMENT_SPEED, 0.35F);
     }
 
-    public static void spawnNear(PlayerEntity player, int range) {
+    public static <T extends LivingEntity> void spawn(PlayerEntity player, EntityType<T> type, int min, int max) {
         BlockPos center = player.blockPosition();
         Random random = player.getRandom();
-        EntityType<TaxCollectorEntity> type = RegistryHandler.TAX_COLLECTOR_ENTITY.get();
         for (int i = 0; i < 10; i++) {
-            int j = center.getX() + random.nextInt(range * 2) - range;
-            int k = center.getZ() + random.nextInt(range * 2) - range;
-            int l = player.level.getHeight(Heightmap.Type.WORLD_SURFACE, j, k);
-            BlockPos pos = new BlockPos(j, l, k);
+            int x = center.getX() + (random.nextInt(max - min + 1) + min) * (random.nextBoolean() ? -1 : 1);
+            int z = center.getZ() + (random.nextInt(max - min + 1) + min) * (random.nextBoolean() ? -1 : 1);
+            int y = player.level.getHeight(Heightmap.Type.WORLD_SURFACE, x, z);
+            BlockPos pos = new BlockPos(x, y, z);
             if (WorldEntitySpawner.isSpawnPositionOk(EntitySpawnPlacementRegistry.PlacementType.ON_GROUND, player.level, pos, type)) {
-                TaxCollectorEntity entity = type.create(player.level);
+                T entity = type.create(player.level);
                 if (entity != null) {
                     Vector3d vec = Vector3d.atBottomCenterOf(pos);
                     entity.setPos(vec.x(), vec.y(), vec.z());
@@ -70,7 +69,7 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
         goalSelector.addGoal(3, new LookAtGoal(this, PlayerEntity.class, 6));
         goalSelector.addGoal(4, new LookRandomlyGoal(this));
         targetSelector.addGoal(0, new HurtByTargetGoal(this));
-        targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, 10, true, false, player -> Debt.get((PlayerEntity) player).getAllDebt().size() >= ServerConfigs.INSTANCE.punishAmt.get()));
+        targetSelector.addGoal(1, new TargetIndebtedGoal<>(this, true));
     }
 
     @Override

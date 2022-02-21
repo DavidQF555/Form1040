@@ -6,7 +6,7 @@ import io.github.davidqf555.minecraft.f1040.common.packets.PayTaxesPacket;
 import io.github.davidqf555.minecraft.f1040.common.packets.StopPayingPacket;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.button.AbstractButton;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.item.ItemStack;
@@ -106,15 +106,10 @@ public class TaxScreen extends Screen {
 
     }
 
-    private class PayButton extends Button {
+    private class PayButton extends AbstractButton {
 
         public PayButton(int x, int y, int width, int height) {
-            super(x, y, width, height, PAY, button -> {
-                if (TaxScreen.this.canPay) {
-                    Form1040.CHANNEL.sendToServer(new PayTaxesPacket());
-                    TaxScreen.this.onClose();
-                }
-            });
+            super(x, y, width, height, PAY);
         }
 
         @Override
@@ -132,6 +127,14 @@ public class TaxScreen extends Screen {
             minecraft.getTextureManager().bind(TEXTURE);
             blit(matrix, x, y, xStart, 166, width, height, TEXTURE_WIDTH, TEXTURE_HEIGHT);
             drawCenteredString(matrix, font, getMessage(), x + width / 2, y + (height - font.lineHeight) / 2, color);
+        }
+
+        @Override
+        public void onPress() {
+            if (canPay) {
+                Form1040.CHANNEL.sendToServer(new PayTaxesPacket());
+                onClose();
+            }
         }
     }
 }
