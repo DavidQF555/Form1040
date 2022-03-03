@@ -8,6 +8,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -27,19 +28,17 @@ public class StopPayingPacket {
     }
 
     public static void register(int index) {
-        Form1040.CHANNEL.registerMessage(index, StopPayingPacket.class, ENCODER, DECODER, CONSUMER);
+        Form1040.CHANNEL.registerMessage(index, StopPayingPacket.class, ENCODER, DECODER, CONSUMER, Optional.of(NetworkDirection.PLAY_TO_SERVER));
     }
 
     private void handle(NetworkEvent.Context context) {
-        if (context.getDirection() == NetworkDirection.PLAY_TO_SERVER) {
-            ServerPlayerEntity player = context.getSender();
-            context.enqueueWork(() -> {
-                Entity collector = player.getLevel().getEntity(this.collector);
-                if (collector instanceof TaxCollectorEntity) {
-                    ((TaxCollectorEntity) collector).setTradingPlayer(null);
-                }
-            });
-            context.setPacketHandled(true);
-        }
+        ServerPlayerEntity player = context.getSender();
+        context.enqueueWork(() -> {
+            Entity collector = player.getLevel().getEntity(this.collector);
+            if (collector instanceof TaxCollectorEntity) {
+                ((TaxCollectorEntity) collector).setTradingPlayer(null);
+            }
+        });
+        context.setPacketHandled(true);
     }
 }
