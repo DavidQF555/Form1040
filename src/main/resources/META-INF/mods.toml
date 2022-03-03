@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[39,)"
+loaderVersion = "[40,)"
 license = "GPLv3"
 issueTrackerURL = "https://github.com/DavidQF555/Form1040/issues"
 [[mods]]
@@ -13,12 +13,12 @@ description = 'This mod adds taxes.'
 [[dependencies.f1040]]
 modId = "forge"
 mandatory = true
-versionRange = "[39,)"
+versionRange = "[40,)"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.f1040]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.18.1,1.19)"
+versionRange = "[1.18.2,1.19)"
 ordering = "NONE"
 side = "BOTH"
