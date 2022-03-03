@@ -14,10 +14,10 @@ public class ServerConfigs {
         SPEC = pair.getRight();
     }
 
-    public final ForgeConfigSpec.ConfigValue<Double> taxRate;
-    public final ForgeConfigSpec.ConfigValue<Integer> indebtedAmt, villageRange, ironGolemCount, taxCollectorMin, taxCollectorMax;
-    public final ForgeConfigSpec.ConfigValue<Boolean> roundUp, persistent;
-    public final ForgeConfigSpec.ConfigValue<Long> taxPeriod;
+    public final ForgeConfigSpec.DoubleValue taxRate;
+    public final ForgeConfigSpec.IntValue indebtedAmt, villageRange, ironGolemCount, taxCollectorMin, taxCollectorMax;
+    public final ForgeConfigSpec.BooleanValue roundUp, persistent;
+    public final ForgeConfigSpec.LongValue taxPeriod;
 
     public ServerConfigs(ForgeConfigSpec.Builder builder) {
         builder.push("Server config for Form 1040 mod");

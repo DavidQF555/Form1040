@@ -1,6 +1,6 @@
 {
   "entity.f1040.tax_collector": "Tax Collector",
-  "gui.f1040.tax_screen": "Tax",
+  "gui.f1040.tax_screen": "Taxes",
   "gui.f1040.tax_screen.pay": "Pay",
   "commands.f1040.add": "Taxed %s targets",
   "commands.f1040.clear": "Cleared debt of %s targets"

@@ -1,14 +1,14 @@
 package io.github.davidqf555.minecraft.f1040.common.packets;
 
-import io.github.davidqf555.minecraft.f1040.client.gui.TaxScreen;
+import io.github.davidqf555.minecraft.f1040.client.ClientReference;
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -42,13 +42,11 @@ public class OpenTaxScreenPacket {
     }
 
     public static void register(int index) {
-        Form1040.CHANNEL.registerMessage(index, OpenTaxScreenPacket.class, ENCODER, DECODER, CONSUMER);
+        Form1040.CHANNEL.registerMessage(index, OpenTaxScreenPacket.class, ENCODER, DECODER, CONSUMER, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
 
     private void handle(NetworkEvent.Context context) {
-        if (context.getDirection() == NetworkDirection.PLAY_TO_CLIENT) {
-            context.enqueueWork(() -> Minecraft.getInstance().setScreen(new TaxScreen(items, canPay, collector)));
-            context.setPacketHandled(true);
-        }
+        context.enqueueWork(() -> ClientReference.openTaxScreen(items, canPay, collector));
+        context.setPacketHandled(true);
     }
 }
