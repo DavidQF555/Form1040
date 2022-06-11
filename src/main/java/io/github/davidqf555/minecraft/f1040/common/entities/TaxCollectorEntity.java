@@ -8,6 +8,7 @@ import io.github.davidqf555.minecraft.f1040.common.packets.OpenTaxScreenPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
@@ -29,7 +30,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
-import java.util.Random;
 
 public class TaxCollectorEntity extends PathfinderMob implements Npc {
 
@@ -48,7 +48,7 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
 
     public static <T extends LivingEntity> void spawn(Player player, EntityType<T> type, int min, int max) {
         BlockPos center = player.blockPosition();
-        Random random = player.getRandom();
+        RandomSource random = player.getRandom();
         for (int i = 0; i < 10; i++) {
             int x = center.getX() + (random.nextInt(max - min + 1) + min) * (random.nextBoolean() ? -1 : 1);
             int z = center.getZ() + (random.nextInt(max - min + 1) + min) * (random.nextBoolean() ? -1 : 1);

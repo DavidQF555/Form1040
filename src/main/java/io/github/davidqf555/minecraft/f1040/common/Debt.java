@@ -117,7 +117,7 @@ public class Debt implements INBTSerializable<CompoundTag> {
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
-        getAllDebt().forEach(item -> nbt.putInt(item.getRegistryName().toString(), getDebt(item)));
+        getAllDebt().forEach(item -> nbt.putInt(ForgeRegistries.ITEMS.getKey(item).toString(), getDebt(item)));
         return nbt;
     }
 

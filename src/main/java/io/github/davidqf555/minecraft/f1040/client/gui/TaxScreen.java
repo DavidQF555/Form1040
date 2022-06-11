@@ -14,7 +14,8 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -23,7 +24,7 @@ import java.util.UUID;
 
 public class TaxScreen extends Screen {
 
-    private static final Component TITLE = new TranslatableComponent("gui." + Form1040.MOD_ID + ".tax_screen"), PAY = new TranslatableComponent("gui." + Form1040.MOD_ID + ".tax_screen.pay");
+    private static final Component TITLE = MutableComponent.create(new TranslatableContents("gui." + Form1040.MOD_ID + ".tax_screen")), PAY = MutableComponent.create(new TranslatableContents("gui." + Form1040.MOD_ID + ".tax_screen.pay"));
     private static final ResourceLocation TEXTURE = new ResourceLocation(Form1040.MOD_ID, "textures/gui/tax_screen.png");
     private static final int TEXTURE_WIDTH = 176, TEXTURE_HEIGHT = 184, X_SIZE = 176, Y_SIZE = 166, SLOT_WIDTH = 18, SLOT_HEIGHT = 18;
     private final Slot[] items;

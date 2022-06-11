@@ -5,7 +5,8 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
@@ -50,7 +51,7 @@ public final class TaxCommand {
                 }
             }
         }
-        source.sendSuccess(new TranslatableComponent(ADD, success), true);
+        source.sendSuccess(MutableComponent.create(new TranslatableContents(ADD, success)), true);
         return success;
     }
 
@@ -59,7 +60,7 @@ public final class TaxCommand {
             Debt.get(player).clear();
         }
         int size = targets.size();
-        source.sendSuccess(new TranslatableComponent(CLEAR, size), true);
+        source.sendSuccess(MutableComponent.create(new TranslatableContents(CLEAR, size)), true);
         return size;
     }
 }
