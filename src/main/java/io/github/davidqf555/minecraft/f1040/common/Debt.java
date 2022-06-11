@@ -1,5 +1,6 @@
 package io.github.davidqf555.minecraft.f1040.common;
 
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -10,9 +11,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
+import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,4 +130,31 @@ public class Debt implements INBTSerializable<CompoundTag> {
             }
         }
     }
+
+    public static class Provider implements ICapabilitySerializable<CompoundTag> {
+
+        private final Debt debt;
+
+        public Provider(Debt debt) {
+            this.debt = debt;
+        }
+
+        @Nonnull
+        @Override
+        public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+            return cap == Debt.CAPABILITY ? LazyOptional.of(() -> debt).cast() : LazyOptional.empty();
+        }
+
+        @Override
+        public CompoundTag serializeNBT() {
+            return debt.serializeNBT();
+        }
+
+        @Override
+        public void deserializeNBT(CompoundTag nbt) {
+            debt.deserializeNBT(nbt);
+        }
+    }
+
+    ;
 }
