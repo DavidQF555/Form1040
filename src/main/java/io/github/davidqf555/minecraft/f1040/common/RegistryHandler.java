@@ -14,7 +14,7 @@ import net.minecraftforge.registries.RegistryObject;
 @Mod.EventBusSubscriber(modid = Form1040.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class RegistryHandler {
 
-    public static final RegistryObject<EntityType<TaxCollectorEntity>> TAX_COLLECTOR_ENTITY = RegistryObject.create(new ResourceLocation(Form1040.MOD_ID, "tax_collector"), ForgeRegistries.ENTITIES);
+    public static final RegistryObject<EntityType<TaxCollectorEntity>> TAX_COLLECTOR_ENTITY = RegistryObject.create(new ResourceLocation(Form1040.MOD_ID, "tax_collector"), ForgeRegistries.ENTITY_TYPES);
 
     private RegistryHandler() {
     }
