@@ -2,7 +2,7 @@ package io.github.davidqf555.minecraft.f1040.client;
 
 import io.github.davidqf555.minecraft.f1040.client.render.TaxCollectorRenderer;
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
-import io.github.davidqf555.minecraft.f1040.common.RegistryHandler;
+import io.github.davidqf555.minecraft.f1040.registration.EntityRegistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -17,6 +17,6 @@ public final class EventBusSubscriber {
 
     @SubscribeEvent
     public static void onFMLClientSetup(FMLClientSetupEvent event) {
-        RenderingRegistry.registerEntityRenderingHandler(RegistryHandler.TAX_COLLECTOR_ENTITY.get(), TaxCollectorRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(EntityRegistry.TAX_COLLECTOR.get(), TaxCollectorRenderer::new);
     }
 }

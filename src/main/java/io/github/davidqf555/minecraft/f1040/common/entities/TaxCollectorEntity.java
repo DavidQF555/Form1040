@@ -1,10 +1,9 @@
 package io.github.davidqf555.minecraft.f1040.common.entities;
 
-import io.github.davidqf555.minecraft.f1040.common.Debt;
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
-import io.github.davidqf555.minecraft.f1040.common.RegistryHandler;
 import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
 import io.github.davidqf555.minecraft.f1040.common.packets.OpenTaxScreenPacket;
+import io.github.davidqf555.minecraft.f1040.common.player.Debt;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -30,8 +29,8 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
 
     private PlayerEntity trading;
 
-    public TaxCollectorEntity(World world) {
-        super(RegistryHandler.TAX_COLLECTOR_ENTITY.get(), world);
+    public TaxCollectorEntity(EntityType<TaxCollectorEntity> type, World world) {
+        super(type, world);
         setItemInHand(Hand.MAIN_HAND, Items.IRON_AXE.getDefaultInstance());
     }
 
@@ -105,14 +104,6 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
         super.aiStep();
         if (tickCount >= ServerConfigs.INSTANCE.taxPeriod.get()) {
             remove();
-        }
-    }
-
-    public static class Factory implements EntityType.IFactory<TaxCollectorEntity> {
-
-        @Override
-        public TaxCollectorEntity create(EntityType<TaxCollectorEntity> type, World world) {
-            return new TaxCollectorEntity(world);
         }
     }
 

@@ -1,5 +1,6 @@
-package io.github.davidqf555.minecraft.f1040.common;
+package io.github.davidqf555.minecraft.f1040.common.player;
 
+import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.Item;
