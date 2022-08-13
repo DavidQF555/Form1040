@@ -2,6 +2,7 @@ package io.github.davidqf555.minecraft.f1040.common.events;
 
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
+import io.github.davidqf555.minecraft.f1040.common.items.OffshoreBankAccountInventory;
 import io.github.davidqf555.minecraft.f1040.common.player.Debt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -47,6 +48,7 @@ public final class DataEventSubscriber {
         @SubscribeEvent
         public static void onFMLCommonSetup(FMLCommonSetupEvent event) {
             CapabilityManager.INSTANCE.register(Debt.class, new Debt.Storage(), Debt::new);
+            CapabilityManager.INSTANCE.register(OffshoreBankAccountInventory.class, new OffshoreBankAccountInventory.Storage(), OffshoreBankAccountInventory::new);
         }
 
     }

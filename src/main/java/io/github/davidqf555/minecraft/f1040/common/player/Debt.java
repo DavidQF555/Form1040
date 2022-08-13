@@ -1,6 +1,7 @@
 package io.github.davidqf555.minecraft.f1040.common.player;
 
 import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
+import io.github.davidqf555.minecraft.f1040.registration.TagRegistry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.Item;
@@ -41,7 +42,9 @@ public class Debt implements INBTSerializable<CompoundNBT> {
         for (ItemStack stack : player.inventory.items) {
             if (!stack.isEmpty()) {
                 Item item = stack.getItem();
-                unique.put(item, unique.getOrDefault(item, 0) + stack.getCount());
+                if (!TagRegistry.TAX_EXEMPT.contains(item)) {
+                    unique.put(item, unique.getOrDefault(item, 0) + stack.getCount());
+                }
             }
         }
         if (!unique.isEmpty()) {
