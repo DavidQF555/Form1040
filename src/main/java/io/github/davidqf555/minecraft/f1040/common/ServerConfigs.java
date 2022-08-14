@@ -14,7 +14,7 @@ public class ServerConfigs {
         SPEC = pair.getRight();
     }
 
-    public final ForgeConfigSpec.DoubleValue taxRate;
+    public final ForgeConfigSpec.DoubleValue taxRate, shadyBankerRate;
     public final ForgeConfigSpec.IntValue indebtedAmt, villageRange, ironGolemCount, taxCollectorMin, taxCollectorMax;
     public final ForgeConfigSpec.BooleanValue roundUp, persistent;
     public final ForgeConfigSpec.LongValue taxPeriod;
@@ -39,6 +39,8 @@ public class ServerConfigs {
                 .defineInRange("minDist", 8, 0, Integer.MAX_VALUE);
         taxCollectorMax = builder.comment("This is the maximum distance tax collectors and iron golems will spawn from the player. Must be greater than or equal to minDist. ")
                 .defineInRange("minDist", 12, 1, Integer.MAX_VALUE);
+        shadyBankerRate = builder.comment("This is the chance that a Shady Banker spawns every tax period for each player. ")
+                .defineInRange("shadyBankerRate", 0.2, 0, 1);
         builder.pop();
     }
 }

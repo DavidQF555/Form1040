@@ -1,7 +1,11 @@
 {
+  "itemGroup.f1040": "Form 1040",
   "entity.f1040.tax_collector": "Tax Collector",
+  "entity.f1040.shady_banker": "Shady Banker",
   "gui.f1040.tax_screen": "Taxes",
   "gui.f1040.tax_screen.pay": "Pay",
   "commands.f1040.add": "Taxed %s targets",
-  "commands.f1040.clear": "Cleared debt of %s targets"
+  "commands.f1040.clear": "Cleared debt of %s targets",
+  "container.f1040.offshore_bank_account": "Offshore Bank Account",
+  "item.f1040.offshore_bank_account": "Offshore Bank Account"
 }
