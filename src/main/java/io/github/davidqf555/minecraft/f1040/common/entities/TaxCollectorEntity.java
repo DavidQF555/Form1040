@@ -40,7 +40,8 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
                 .add(Attributes.MOVEMENT_SPEED, 0.35F);
     }
 
-    public static <T extends LivingEntity> void spawn(PlayerEntity player, EntityType<T> type, int min, int max) {
+    @Nullable
+    public static <T extends LivingEntity> T spawn(PlayerEntity player, EntityType<T> type, int min, int max) {
         BlockPos center = player.blockPosition();
         Random random = player.getRandom();
         for (int i = 0; i < 10; i++) {
@@ -54,10 +55,11 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
                     Vector3d vec = Vector3d.atBottomCenterOf(pos);
                     entity.setPos(vec.x(), vec.y(), vec.z());
                     player.level.addFreshEntity(entity);
-                    return;
+                    return entity;
                 }
             }
         }
+        return null;
     }
 
     @Override
@@ -65,8 +67,9 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
         goalSelector.addGoal(0, new SwimGoal(this));
         goalSelector.addGoal(1, new LookAtPayerGoal());
         goalSelector.addGoal(2, new MeleeAttackGoal(this, 1, true));
-        goalSelector.addGoal(3, new LookAtGoal(this, PlayerEntity.class, 6));
-        goalSelector.addGoal(4, new LookRandomlyGoal(this));
+        goalSelector.addGoal(3, new FollowPlayersGoal(this, 1, 4, 16));
+        goalSelector.addGoal(4, new LookAtGoal(this, PlayerEntity.class, 6));
+        goalSelector.addGoal(5, new LookRandomlyGoal(this));
         targetSelector.addGoal(0, new HurtByTargetGoal(this));
         targetSelector.addGoal(1, new TargetIndebtedGoal<>(this, true));
     }

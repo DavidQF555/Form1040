@@ -1,6 +1,7 @@
 package io.github.davidqf555.minecraft.f1040.client;
 
 import io.github.davidqf555.minecraft.f1040.client.gui.OffshoreBankAccountScreen;
+import io.github.davidqf555.minecraft.f1040.client.render.ShadyBankerRenderer;
 import io.github.davidqf555.minecraft.f1040.client.render.TaxCollectorRenderer;
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import io.github.davidqf555.minecraft.f1040.registration.ContainerRegistry;
@@ -21,6 +22,7 @@ public final class EventBusSubscriber {
     @SubscribeEvent
     public static void onFMLClientSetup(FMLClientSetupEvent event) {
         RenderingRegistry.registerEntityRenderingHandler(EntityRegistry.TAX_COLLECTOR.get(), TaxCollectorRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(EntityRegistry.SHADY_BANKER.get(), ShadyBankerRenderer::new);
         event.enqueueWork(() -> {
             ScreenManager.register(ContainerRegistry.OFFSHORE_BANK_ACCOUNT.get(), OffshoreBankAccountScreen::new);
         });

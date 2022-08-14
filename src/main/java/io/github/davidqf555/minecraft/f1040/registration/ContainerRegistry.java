@@ -15,11 +15,12 @@ public final class ContainerRegistry {
     public static final DeferredRegister<ContainerType<?>> TYPES = DeferredRegister.create(ForgeRegistries.CONTAINERS, Form1040.MOD_ID);
 
     private ContainerRegistry() {
-    }    public static final RegistryObject<ContainerType<OffshoreBankAccountContainer>> OFFSHORE_BANK_ACCOUNT = register("offshore_bank_account", OffshoreBankAccountContainer::new);
+    }
 
     private static <T extends Container> RegistryObject<ContainerType<T>> register(String name, IContainerFactory<T> factory) {
         return TYPES.register(name, () -> IForgeContainerType.create(factory));
-    }
+    }    public static final RegistryObject<ContainerType<OffshoreBankAccountContainer>> OFFSHORE_BANK_ACCOUNT = register("offshore_bank_account", OffshoreBankAccountContainer::new);
+
 
 
 

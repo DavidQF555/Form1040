@@ -12,7 +12,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class TaxCollectorRenderer extends MobRenderer<TaxCollectorEntity, MixedVillagerModel<TaxCollectorEntity>> {
 
-    private static final ResourceLocation TEXTURE = new ResourceLocation(Form1040.MOD_ID, "textures/entity/tax_collector.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(Form1040.MOD_ID, "textures/entity/extended_villager.png");
 
     public TaxCollectorRenderer(EntityRendererManager manager) {
         super(manager, new MixedVillagerModel<>(0), 0.5f);
@@ -24,7 +24,7 @@ public class TaxCollectorRenderer extends MobRenderer<TaxCollectorEntity, MixedV
                 }
             }
         });
-        addLayer(new UniformLayerRenderer(this));
+        addLayer(new OverlayLayerRenderer<>(this, new ResourceLocation(Form1040.MOD_ID, "textures/entity/suit.png")));
     }
 
     @Override

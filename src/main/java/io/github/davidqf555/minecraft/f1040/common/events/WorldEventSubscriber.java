@@ -2,6 +2,7 @@ package io.github.davidqf555.minecraft.f1040.common.events;
 
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
+import io.github.davidqf555.minecraft.f1040.common.entities.ShadyBankerEntity;
 import io.github.davidqf555.minecraft.f1040.common.entities.TargetIndebtedGoal;
 import io.github.davidqf555.minecraft.f1040.common.entities.TaxCollectorEntity;
 import io.github.davidqf555.minecraft.f1040.common.player.Debt;
@@ -44,6 +45,12 @@ public final class WorldEventSubscriber {
                         if (Debt.isIndebted(player)) {
                             for (int i = 0; i < ServerConfigs.INSTANCE.ironGolemCount.get(); i++) {
                                 TaxCollectorEntity.spawn(player, EntityType.IRON_GOLEM, min, max);
+                            }
+                        }
+                        if (player.getRandom().nextDouble() < ServerConfigs.INSTANCE.shadyBankerRate.get()) {
+                            ShadyBankerEntity entity = TaxCollectorEntity.spawn(player, EntityRegistry.SHADY_BANKER.get(), min, max);
+                            if (entity != null) {
+                                entity.setDespawn(6000);
                             }
                         }
                     }
