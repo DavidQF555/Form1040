@@ -1,25 +1,25 @@
 package io.github.davidqf555.minecraft.f1040.common.entities;
 
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.pathfinding.PathNavigator;
-import net.minecraft.pathfinding.PathNodeType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 
 import java.util.EnumSet;
 
 public class FollowPlayersGoal extends Goal {
 
-    private final MobEntity mob;
+    private final Mob mob;
     private final double speedModifier;
-    private final PathNavigator navigation;
+    private final PathNavigation navigation;
     private final float stopDistance;
     private final float areaSize;
-    private PlayerEntity followingMob;
+    private Player followingMob;
     private int timeToRecalcPath;
     private float oldWaterCost;
 
-    public FollowPlayersGoal(MobEntity mob, double speed, float stopDist, float dist) {
+    public FollowPlayersGoal(Mob mob, double speed, float stopDist, float dist) {
         this.mob = mob;
         speedModifier = speed;
         navigation = mob.getNavigation();
@@ -30,7 +30,7 @@ public class FollowPlayersGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        PlayerEntity player = mob.level.getNearestPlayer(mob, areaSize);
+        Player player = mob.level.getNearestPlayer(mob, areaSize);
         if (player != null) {
             followingMob = player;
             return true;
@@ -46,15 +46,15 @@ public class FollowPlayersGoal extends Goal {
     @Override
     public void start() {
         timeToRecalcPath = 0;
-        oldWaterCost = mob.getPathfindingMalus(PathNodeType.WATER);
-        mob.setPathfindingMalus(PathNodeType.WATER, 0.0F);
+        oldWaterCost = mob.getPathfindingMalus(BlockPathTypes.WATER);
+        mob.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
     }
 
     @Override
     public void stop() {
         followingMob = null;
         navigation.stop();
-        mob.setPathfindingMalus(PathNodeType.WATER, oldWaterCost);
+        mob.setPathfindingMalus(BlockPathTypes.WATER, oldWaterCost);
     }
 
     @Override

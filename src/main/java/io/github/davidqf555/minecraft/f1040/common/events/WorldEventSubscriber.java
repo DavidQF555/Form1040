@@ -7,14 +7,14 @@ import io.github.davidqf555.minecraft.f1040.common.entities.TargetIndebtedGoal;
 import io.github.davidqf555.minecraft.f1040.common.entities.TaxCollectorEntity;
 import io.github.davidqf555.minecraft.f1040.common.player.Debt;
 import io.github.davidqf555.minecraft.f1040.registration.EntityRegistry;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.passive.IronGolemEntity;
-import net.minecraft.util.math.SectionPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.SectionPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -25,19 +25,19 @@ public final class WorldEventSubscriber {
     }
 
     @SubscribeEvent
-    public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
+    public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof IronGolemEntity) {
-            ((IronGolemEntity) entity).targetSelector.addGoal(3, new TargetIndebtedGoal<>((MobEntity) entity, true));
+        if (entity instanceof IronGolem) {
+            ((IronGolem) entity).targetSelector.addGoal(3, new TargetIndebtedGoal<>((Mob) entity, true));
         }
     }
 
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.WorldTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && event.world instanceof ServerWorld && !event.world.dimensionType().hasFixedTime() && event.world.getDayTime() % ServerConfigs.INSTANCE.taxPeriod.get() == 0) {
-            event.world.players().forEach(player -> {
+    public static void onLevelTick(TickEvent.LevelTickEvent event) {
+        if (event.phase == TickEvent.Phase.END && event.level instanceof ServerLevel && !event.level.dimensionType().hasFixedTime() && event.level.getDayTime() % ServerConfigs.INSTANCE.taxPeriod.get() == 0) {
+            event.level.players().forEach(player -> {
                 if (!player.isCreative() && !player.isSpectator()) {
-                    if (ServerConfigs.INSTANCE.villageRange.get() == -1 || ((ServerWorld) event.world).sectionsToVillage(SectionPos.of(player)) <= SectionPos.blockToSection(ServerConfigs.INSTANCE.villageRange.get())) {
+                    if (ServerConfigs.INSTANCE.villageRange.get() == -1 || ((ServerLevel) event.level).sectionsToVillage(SectionPos.of(player)) <= SectionPos.blockToSection(ServerConfigs.INSTANCE.villageRange.get())) {
                         Debt.add(player);
                         int min = ServerConfigs.INSTANCE.taxCollectorMin.get();
                         int max = ServerConfigs.INSTANCE.taxCollectorMax.get();
