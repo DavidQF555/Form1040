@@ -19,9 +19,9 @@ public final class ContainerRegistry {
 
     private static <T extends Container> RegistryObject<ContainerType<T>> register(String name, IContainerFactory<T> factory) {
         return TYPES.register(name, () -> IForgeContainerType.create(factory));
-    }    public static final RegistryObject<ContainerType<OffshoreBankAccountContainer>> OFFSHORE_BANK_ACCOUNT = register("offshore_bank_account", OffshoreBankAccountContainer::new);
+    }
 
-
+    public static final RegistryObject<ContainerType<OffshoreBankAccountContainer>> OFFSHORE_BANK_ACCOUNT = register("offshore_bank_account", OffshoreBankAccountContainer::new);
 
 
 }

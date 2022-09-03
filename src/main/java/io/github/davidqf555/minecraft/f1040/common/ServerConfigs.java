@@ -14,7 +14,7 @@ public class ServerConfigs {
         SPEC = pair.getRight();
     }
 
-    public final ForgeConfigSpec.DoubleValue taxRate, shadyBankerRate;
+    public final ForgeConfigSpec.DoubleValue taxRate, shadyBankerRate, bribeSuccessRate;
     public final ForgeConfigSpec.IntValue indebtedAmt, villageRange, ironGolemCount, taxCollectorMin, taxCollectorMax;
     public final ForgeConfigSpec.BooleanValue roundUp, persistent;
     public final ForgeConfigSpec.LongValue taxPeriod;
@@ -41,6 +41,8 @@ public class ServerConfigs {
                 .defineInRange("minDist", 12, 1, Integer.MAX_VALUE);
         shadyBankerRate = builder.comment("This is the chance that a Shady Banker spawns every tax period for each player. ")
                 .defineInRange("shadyBankerRate", 0.2, 0, 1);
+        bribeSuccessRate = builder.comment("This is the chance that bribing a Tax Collector is successful. ")
+                .defineInRange("bribeSuccessRate", 0.25, 0, 1);
         builder.pop();
     }
 }

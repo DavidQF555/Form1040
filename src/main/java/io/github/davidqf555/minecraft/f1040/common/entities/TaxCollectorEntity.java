@@ -4,6 +4,7 @@ import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
 import io.github.davidqf555.minecraft.f1040.common.packets.OpenTaxScreenPacket;
 import io.github.davidqf555.minecraft.f1040.common.player.Debt;
+import io.github.davidqf555.minecraft.f1040.registration.TagRegistry;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -12,6 +13,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
@@ -76,7 +78,7 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
 
     @Override
     public ActionResultType interactAt(PlayerEntity player, Vector3d hit, Hand hand) {
-        if (player instanceof ServerPlayerEntity) {
+        if (player instanceof ServerPlayerEntity && hand == Hand.MAIN_HAND) {
             NonNullList<ItemStack> tax = NonNullList.create();
             Debt debt = Debt.get(player);
             debt.getAllDebt().forEach(item -> {
@@ -85,9 +87,24 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
                 tax.add(stack);
             });
             if (!tax.isEmpty()) {
-                setTradingPlayer(player);
-                Form1040.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new OpenTaxScreenPacket(tax, Debt.canPay(player), getUUID()));
-                return ActionResultType.SUCCESS;
+                ItemStack item = player.getItemInHand(hand);
+                if (!item.isEmpty() && TagRegistry.BRIBE.contains(item.getItem())) {
+                    if (!player.isCreative()) {
+                        item.shrink(1);
+                    }
+                    if (player.getRandom().nextDouble() < ServerConfigs.INSTANCE.bribeSuccessRate.get()) {
+                        Debt.get(player).clear();
+                        level.broadcastEntityEvent(this, (byte) 0);
+                    } else {
+                        Debt.add(player);
+                        level.broadcastEntityEvent(this, (byte) 1);
+                    }
+                    return ActionResultType.CONSUME;
+                } else {
+                    setTradingPlayer(player);
+                    Form1040.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new OpenTaxScreenPacket(tax, Debt.canPay(player), getUUID()));
+                    return ActionResultType.SUCCESS;
+                }
             }
         }
         return super.interactAt(player, hit, hand);
@@ -108,6 +125,28 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
         if (tickCount >= ServerConfigs.INSTANCE.taxPeriod.get()) {
             remove();
         }
+    }
+
+    @Override
+    public void handleEntityEvent(byte val) {
+        if (val == 0) {
+            for (int i = 0; i < 7; i++) {
+                double dX = random.nextGaussian() * 0.02;
+                double dY = random.nextGaussian() * 0.02;
+                double dZ = random.nextGaussian() * 0.02;
+                level.addParticle(ParticleTypes.HAPPY_VILLAGER, getRandomX(1), getRandomY() + 0.5, getRandomZ(1), dX, dY, dZ);
+            }
+        } else if (val == 1) {
+            for (int i = 0; i < 7; i++) {
+                double dX = random.nextGaussian() * 0.02;
+                double dY = random.nextGaussian() * 0.02;
+                double dZ = random.nextGaussian() * 0.02;
+                level.addParticle(ParticleTypes.ANGRY_VILLAGER, getRandomX(1), getRandomY() + 0.5, getRandomZ(1), dX, dY, dZ);
+            }
+        } else {
+            super.handleEntityEvent(val);
+        }
+
     }
 
     private class LookAtPayerGoal extends LookAtGoal {

@@ -9,6 +9,7 @@ import net.minecraft.util.ResourceLocation;
 public final class TagRegistry {
 
     public static final ITag.INamedTag<Item> TAX_EXEMPT = ItemTags.bind(new ResourceLocation(Form1040.MOD_ID, "tax_exempt").toString());
+    public static final ITag.INamedTag<Item> BRIBE = ItemTags.bind(new ResourceLocation(Form1040.MOD_ID, "bribe").toString());
 
     private TagRegistry() {
     }
