@@ -9,6 +9,7 @@ import net.minecraft.world.item.Item;
 public final class TagRegistry {
 
     public static final TagKey<Item> TAX_EXEMPT = ItemTags.create(new ResourceLocation(Form1040.MOD_ID, "tax_exempt"));
+    public static final TagKey<Item> BRIBE = ItemTags.create(new ResourceLocation(Form1040.MOD_ID, "bribe"));
 
     private TagRegistry() {
     }
