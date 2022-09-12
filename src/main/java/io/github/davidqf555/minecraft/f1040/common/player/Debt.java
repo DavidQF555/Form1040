@@ -1,5 +1,7 @@
-package io.github.davidqf555.minecraft.f1040.common;
+package io.github.davidqf555.minecraft.f1040.common.player;
 
+import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
+import io.github.davidqf555.minecraft.f1040.registration.TagRegistry;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -44,7 +46,7 @@ public class Debt implements INBTSerializable<CompoundTag> {
     public static boolean add(Player player) {
         Map<Item, Integer> unique = new HashMap<>();
         for (ItemStack stack : player.getInventory().items) {
-            if (!stack.isEmpty()) {
+            if (!stack.isEmpty() && !stack.is(TagRegistry.TAX_EXEMPT)) {
                 Item item = stack.getItem();
                 unique.put(item, unique.getOrDefault(item, 0) + stack.getCount());
             }
@@ -133,26 +135,22 @@ public class Debt implements INBTSerializable<CompoundTag> {
 
     public static class Provider implements ICapabilitySerializable<CompoundTag> {
 
-        private final Debt debt;
-
-        public Provider(Debt debt) {
-            this.debt = debt;
-        }
+        private final LazyOptional<Debt> debt = LazyOptional.of(Debt::new);
 
         @Nonnull
         @Override
         public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-            return cap == Debt.CAPABILITY ? LazyOptional.of(() -> debt).cast() : LazyOptional.empty();
+            return cap == Debt.CAPABILITY ? debt.cast() : LazyOptional.empty();
         }
 
         @Override
         public CompoundTag serializeNBT() {
-            return debt.serializeNBT();
+            return debt.orElseThrow(NullPointerException::new).serializeNBT();
         }
 
         @Override
         public void deserializeNBT(CompoundTag nbt) {
-            debt.deserializeNBT(nbt);
+            debt.orElseThrow(NullPointerException::new).deserializeNBT(nbt);
         }
     }
 

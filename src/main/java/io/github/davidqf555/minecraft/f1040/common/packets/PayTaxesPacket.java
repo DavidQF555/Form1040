@@ -1,7 +1,7 @@
 package io.github.davidqf555.minecraft.f1040.common.packets;
 
-import io.github.davidqf555.minecraft.f1040.common.Debt;
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
+import io.github.davidqf555.minecraft.f1040.common.player.Debt;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;

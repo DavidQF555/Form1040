@@ -1,6 +1,6 @@
 package io.github.davidqf555.minecraft.f1040.common.entities;
 
-import io.github.davidqf555.minecraft.f1040.common.Debt;
+import io.github.davidqf555.minecraft.f1040.common.player.Debt;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;

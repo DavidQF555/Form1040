@@ -1,12 +1,13 @@
 package io.github.davidqf555.minecraft.f1040.common.entities;
 
-import io.github.davidqf555.minecraft.f1040.common.Debt;
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
-import io.github.davidqf555.minecraft.f1040.common.RegistryHandler;
 import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
 import io.github.davidqf555.minecraft.f1040.common.packets.OpenTaxScreenPacket;
+import io.github.davidqf555.minecraft.f1040.common.player.Debt;
+import io.github.davidqf555.minecraft.f1040.registration.TagRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -35,8 +36,8 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
 
     private Player trading;
 
-    public TaxCollectorEntity(Level world) {
-        super(RegistryHandler.TAX_COLLECTOR_ENTITY.get(), world);
+    public TaxCollectorEntity(EntityType<? extends PathfinderMob> type, Level world) {
+        super(type, world);
         setItemInHand(InteractionHand.MAIN_HAND, Items.IRON_AXE.getDefaultInstance());
     }
 
@@ -46,7 +47,8 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
                 .add(Attributes.MOVEMENT_SPEED, 0.35F);
     }
 
-    public static <T extends LivingEntity> void spawn(Player player, EntityType<T> type, int min, int max) {
+    @Nullable
+    public static <T extends LivingEntity> T spawn(Player player, EntityType<T> type, int min, int max) {
         BlockPos center = player.blockPosition();
         Random random = player.getRandom();
         for (int i = 0; i < 10; i++) {
@@ -60,10 +62,11 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
                     Vec3 vec = Vec3.atBottomCenterOf(pos);
                     entity.setPos(vec.x(), vec.y(), vec.z());
                     player.level.addFreshEntity(entity);
-                    return;
+                    return entity;
                 }
             }
         }
+        return null;
     }
 
     @Override
@@ -71,15 +74,16 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
         goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(1, new LookAtPayerGoal());
         goalSelector.addGoal(2, new MeleeAttackGoal(this, 1, true));
-        goalSelector.addGoal(3, new LookAtPlayerGoal(this, Player.class, 6));
-        goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+        goalSelector.addGoal(3, new FollowPlayersGoal(this, 1, 4, 16));
+        goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6));
+        goalSelector.addGoal(5, new RandomLookAroundGoal(this));
         targetSelector.addGoal(0, new HurtByTargetGoal(this));
         targetSelector.addGoal(1, new TargetIndebtedGoal<>(this, true));
     }
 
     @Override
     public InteractionResult interactAt(Player player, Vec3 hit, InteractionHand hand) {
-        if (player instanceof ServerPlayer) {
+        if (player instanceof ServerPlayer && hand == InteractionHand.MAIN_HAND) {
             NonNullList<ItemStack> tax = NonNullList.create();
             Debt debt = Debt.get(player);
             debt.getAllDebt().forEach(item -> {
@@ -88,9 +92,24 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
                 tax.add(stack);
             });
             if (!tax.isEmpty()) {
-                setTradingPlayer(player);
-                Form1040.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new OpenTaxScreenPacket(tax, Debt.canPay(player), getUUID()));
-                return InteractionResult.SUCCESS;
+                ItemStack item = player.getItemInHand(hand);
+                if (!item.isEmpty() && item.is(TagRegistry.BRIBE)) {
+                    if (!player.isCreative()) {
+                        item.shrink(1);
+                    }
+                    if (player.getRandom().nextDouble() < ServerConfigs.INSTANCE.bribeSuccessRate.get()) {
+                        Debt.get(player).clear();
+                        level.broadcastEntityEvent(this, (byte) 0);
+                    } else {
+                        Debt.add(player);
+                        level.broadcastEntityEvent(this, (byte) 1);
+                    }
+                    return InteractionResult.CONSUME;
+                } else {
+                    setTradingPlayer(player);
+                    Form1040.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new OpenTaxScreenPacket(tax, Debt.canPay(player), getUUID()));
+                    return InteractionResult.SUCCESS;
+                }
             }
         }
         return super.interactAt(player, hit, hand);
@@ -113,12 +132,26 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
         }
     }
 
-    public static class Factory implements EntityType.EntityFactory<TaxCollectorEntity> {
-
-        @Override
-        public TaxCollectorEntity create(EntityType<TaxCollectorEntity> type, Level world) {
-            return new TaxCollectorEntity(world);
+    @Override
+    public void handleEntityEvent(byte val) {
+        if (val == 0) {
+            for (int i = 0; i < 7; i++) {
+                double dX = random.nextGaussian() * 0.02;
+                double dY = random.nextGaussian() * 0.02;
+                double dZ = random.nextGaussian() * 0.02;
+                level.addParticle(ParticleTypes.HAPPY_VILLAGER, getRandomX(1), getRandomY() + 0.5, getRandomZ(1), dX, dY, dZ);
+            }
+        } else if (val == 1) {
+            for (int i = 0; i < 7; i++) {
+                double dX = random.nextGaussian() * 0.02;
+                double dY = random.nextGaussian() * 0.02;
+                double dZ = random.nextGaussian() * 0.02;
+                level.addParticle(ParticleTypes.ANGRY_VILLAGER, getRandomX(1), getRandomY() + 0.5, getRandomZ(1), dX, dY, dZ);
+            }
+        } else {
+            super.handleEntityEvent(val);
         }
+
     }
 
     private class LookAtPayerGoal extends LookAtPlayerGoal {
