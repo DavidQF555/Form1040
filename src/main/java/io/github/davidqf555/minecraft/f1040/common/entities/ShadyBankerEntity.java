@@ -1,75 +1,78 @@
 package io.github.davidqf555.minecraft.f1040.common.entities;
 
 import io.github.davidqf555.minecraft.f1040.registration.ItemRegistry;
-import net.minecraft.entity.AgeableEntity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.*;
-import net.minecraft.entity.item.ExperienceOrbEntity;
-import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
-import net.minecraft.entity.merchant.villager.VillagerTrades;
-import net.minecraft.entity.monster.*;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.MerchantOffer;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.*;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.BasicTrade;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.monster.*;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.common.BasicItemListing;
 
 import javax.annotation.Nullable;
 
-public class ShadyBankerEntity extends AbstractVillagerEntity {
+public class ShadyBankerEntity extends AbstractVillager {
 
     private int despawn;
 
-    public ShadyBankerEntity(EntityType<? extends ShadyBankerEntity> type, World world) {
+    public ShadyBankerEntity(EntityType<? extends ShadyBankerEntity> type, Level world) {
         super(type, world);
-        forcedLoading = true;
     }
 
     @Override
     protected void registerGoals() {
-        goalSelector.addGoal(0, new SwimGoal(this));
+        goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(1, new TradeWithPlayerGoal(this));
-        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, ZombieEntity.class, 8, 0.5, 0.5));
-        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, EvokerEntity.class, 12, 0.5, 0.5));
-        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, VindicatorEntity.class, 8, 0.5, 0.5));
-        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, VexEntity.class, 8, 0.5, 0.5));
-        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, PillagerEntity.class, 15, 0.5, 0.5));
-        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, IllusionerEntity.class, 12, 0.5, 0.5));
-        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, ZoglinEntity.class, 10, 0.5, 0.5));
-        goalSelector.addGoal(1, new PanicGoal(this, 0.5));
-        goalSelector.addGoal(1, new LookAtCustomerGoal(this));
+        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, Zombie.class, 8.0F, 0.5D, 0.5D));
+        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, Evoker.class, 12.0F, 0.5D, 0.5D));
+        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, Vindicator.class, 8.0F, 0.5D, 0.5D));
+        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, Vex.class, 8.0F, 0.5D, 0.5D));
+        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, Pillager.class, 15.0F, 0.5D, 0.5D));
+        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, Illusioner.class, 12.0F, 0.5D, 0.5D));
+        goalSelector.addGoal(1, new AvoidEntityGoal<>(this, Zoglin.class, 10.0F, 0.5D, 0.5D));
+        goalSelector.addGoal(1, new PanicGoal(this, 0.5D));
+        goalSelector.addGoal(1, new LookAtTradingPlayerGoal(this));
         goalSelector.addGoal(2, new FollowPlayersGoal(this, 1, 4, 16));
-        goalSelector.addGoal(3, new MoveTowardsRestrictionGoal(this, 0.35));
-        goalSelector.addGoal(4, new WaterAvoidingRandomWalkingGoal(this, 0.35));
-        goalSelector.addGoal(5, new LookAtWithoutMovingGoal(this, PlayerEntity.class, 3, 1));
-        goalSelector.addGoal(6, new LookAtGoal(this, MobEntity.class, 8));
+        goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 0.35D));
+        goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 0.35D));
+        goalSelector.addGoal(9, new InteractGoal(this, Player.class, 3.0F, 1.0F));
+        goalSelector.addGoal(10, new LookAtPlayerGoal(this, Mob.class, 8.0F));
     }
 
     @Override
     @Nullable
-    public AgeableEntity getBreedOffspring(ServerWorld world, AgeableEntity mate) {
+    public AgeableMob getBreedOffspring(ServerLevel world, AgeableMob mate) {
         return null;
     }
 
     @Override
-    public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (isAlive() && !isTrading()) {
-            if (hand == Hand.MAIN_HAND) {
+            if (hand == InteractionHand.MAIN_HAND) {
                 player.awardStat(Stats.TALKED_TO_VILLAGER);
             }
             if (!getOffers().isEmpty() && !level.isClientSide()) {
                 setTradingPlayer(player);
                 openTradingScreen(player, getDisplayName(), 1);
             }
-            return ActionResultType.sidedSuccess(level.isClientSide());
+            return InteractionResult.sidedSuccess(level.isClientSide());
         }
         return super.mobInteract(player, hand);
     }
@@ -85,20 +88,20 @@ public class ShadyBankerEntity extends AbstractVillagerEntity {
 
     @Override
     protected void updateTrades() {
-        VillagerTrades.ITrade account = new BasicTrade(getRandom().nextInt(5) + 8, ItemRegistry.OFFSHORE_BANK_ACCOUNT.get().getDefaultInstance(), 2, 10);
+        VillagerTrades.ItemListing account = new BasicItemListing(getRandom().nextInt(5) + 8, ItemRegistry.OFFSHORE_BANK_ACCOUNT.get().getDefaultInstance(), 2, 10);
         getOffers().add(account.getOffer(this, getRandom()));
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundNBT tag) {
+    public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("Despawn", despawn);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundNBT tag) {
+    public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        if (tag.contains("Despawn", Constants.NBT.TAG_INT)) {
+        if (tag.contains("Despawn", Tag.TAG_INT)) {
             despawn = tag.getInt("Despawn");
         }
     }
@@ -112,7 +115,7 @@ public class ShadyBankerEntity extends AbstractVillagerEntity {
     protected void rewardTradeXp(MerchantOffer offer) {
         if (offer.shouldRewardExp()) {
             int i = 3 + this.random.nextInt(4);
-            this.level.addFreshEntity(new ExperienceOrbEntity(this.level, this.getX(), this.getY() + 0.5D, this.getZ(), i));
+            this.level.addFreshEntity(new ExperienceOrb(this.level, this.getX(), this.getY() + 0.5D, this.getZ(), i));
         }
     }
 
@@ -150,7 +153,7 @@ public class ShadyBankerEntity extends AbstractVillagerEntity {
     @Override
     protected void customServerAiStep() {
         if (despawn > 0 && !this.isTrading() && --despawn == 0) {
-            remove();
+            remove(RemovalReason.DISCARDED);
         }
     }
 }

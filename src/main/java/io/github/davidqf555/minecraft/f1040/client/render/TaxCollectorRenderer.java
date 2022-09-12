@@ -16,8 +16,8 @@ public class TaxCollectorRenderer extends MobRenderer<TaxCollectorEntity, MixedV
     private static final ResourceLocation TEXTURE = new ResourceLocation(Form1040.MOD_ID, "textures/entity/extended_villager.png");
 
     public TaxCollectorRenderer(EntityRendererProvider.Context context) {
-        super(context, new MixedVillagerModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(MixedVillagerModel.LOCATION)), 0.5f);
-        this.addLayer(new ItemInHandLayer<>(this) {
+        super(context, new MixedVillagerModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(MixedVillagerModel.MIXED_VILLAGER)), 0.5f);
+        addLayer(new ItemInHandLayer<>(this) {
             @Override
             public void render(PoseStack p_116352_, MultiBufferSource p_116353_, int p_116354_, TaxCollectorEntity p_116355_, float p_116356_, float p_116357_, float p_116358_, float p_116359_, float p_116360_, float p_116361_) {
                 if (p_116355_.isAggressive()) {

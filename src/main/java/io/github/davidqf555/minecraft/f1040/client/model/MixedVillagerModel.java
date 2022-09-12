@@ -1,7 +1,7 @@
 package io.github.davidqf555.minecraft.f1040.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.davidqf555.minecraft.f1040.common.RegistryHandler;
+import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.VillagerModel;
@@ -12,12 +12,14 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.Mob;
 
 public class MixedVillagerModel<T extends Mob> extends VillagerModel<T> implements ArmedModel {
 
-    public static final ModelLayerLocation LOCATION = new ModelLayerLocation(RegistryHandler.TAX_COLLECTOR_ENTITY.getId(), "main");
+    public static final ModelLayerLocation MIXED_VILLAGER = new ModelLayerLocation(new ResourceLocation(Form1040.MOD_ID, "mixed_villager"), "main");
+    public static final ModelLayerLocation EXTENDED_VILLAGER = new ModelLayerLocation(new ResourceLocation(Form1040.MOD_ID, "extended_villager"), "main");
     private final ModelPart leftArm, rightArm, arms;
 
     public MixedVillagerModel(ModelPart part) {
@@ -40,6 +42,10 @@ public class MixedVillagerModel<T extends Mob> extends VillagerModel<T> implemen
                 .addBox(-1, -2, -2, 4, 12, 4), PartPose.offset(5, 2, 0)
         );
         return LayerDefinition.create(meshdefinition, 80, 64);
+    }
+
+    public static LayerDefinition createExtendedVillager() {
+        return LayerDefinition.create(createBodyModel(), 80, 64);
     }
 
     @Override

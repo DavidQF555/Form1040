@@ -1,23 +1,23 @@
 package io.github.davidqf555.minecraft.f1040.common.items;
 
 import io.github.davidqf555.minecraft.f1040.registration.ContainerRegistry;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 
-public class OffshoreBankAccountContainer extends Container {
+public class OffshoreBankAccountContainer extends AbstractContainerMenu {
 
-    private final IInventory inventory;
+    private final Container inventory;
 
-    public OffshoreBankAccountContainer(@Nullable ContainerType<?> type, int id, PlayerInventory player, IInventory inventory) {
+    public OffshoreBankAccountContainer(@Nullable MenuType<?> type, int id, Inventory player, Container inventory) {
         super(type, id);
         this.inventory = inventory;
         checkContainerSize(inventory, 5);
@@ -35,23 +35,23 @@ public class OffshoreBankAccountContainer extends Container {
         }
     }
 
-    public OffshoreBankAccountContainer(int id, PlayerInventory player, IInventory inventory) {
+    public OffshoreBankAccountContainer(int id, Inventory player, Container inventory) {
         this(ContainerRegistry.OFFSHORE_BANK_ACCOUNT.get(), id, player, inventory);
     }
 
-    public OffshoreBankAccountContainer(int id, PlayerInventory player) {
-        this(id, player, new Inventory(5));
+    public OffshoreBankAccountContainer(int id, Inventory player) {
+        this(id, player, new SimpleContainer(5));
     }
 
-    public OffshoreBankAccountContainer(int id, PlayerInventory player, PacketBuffer data) {
+    public OffshoreBankAccountContainer(int id, Inventory player, FriendlyByteBuf data) {
         this(id, player);
     }
 
     @Override
-    public ItemStack quickMoveStack(PlayerEntity player, int index) {
+    public ItemStack quickMoveStack(Player player, int index) {
         ItemStack stack = ItemStack.EMPTY;
         Slot slot = slots.get(index);
-        if (slot != null && slot.hasItem()) {
+        if (slot.hasItem()) {
             ItemStack copy = slot.getItem().copy();
             if (index < inventory.getContainerSize()) {
                 if (!moveItemStackTo(copy, inventory.getContainerSize(), slots.size(), true)) {
@@ -70,13 +70,13 @@ public class OffshoreBankAccountContainer extends Container {
     }
 
     @Override
-    public void removed(PlayerEntity player) {
+    public void removed(Player player) {
         super.removed(player);
         inventory.stopOpen(player);
     }
 
     @Override
-    public boolean stillValid(PlayerEntity player) {
+    public boolean stillValid(Player player) {
         return inventory.stillValid(player);
     }
 
