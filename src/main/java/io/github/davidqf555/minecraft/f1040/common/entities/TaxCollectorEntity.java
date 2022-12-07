@@ -4,6 +4,7 @@ import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
 import io.github.davidqf555.minecraft.f1040.common.packets.OpenTaxScreenPacket;
 import io.github.davidqf555.minecraft.f1040.common.player.Debt;
+import io.github.davidqf555.minecraft.f1040.common.world.data.WorldRelationData;
 import io.github.davidqf555.minecraft.f1040.registration.TagRegistry;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
@@ -13,6 +14,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
@@ -22,6 +24,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.spawner.WorldEntitySpawner;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nullable;
@@ -30,6 +33,7 @@ import java.util.Random;
 public class TaxCollectorEntity extends CreatureEntity implements INPC {
 
     private PlayerEntity trading;
+    private int govID;
 
     public TaxCollectorEntity(EntityType<TaxCollectorEntity> type, World world) {
         super(type, world);
@@ -76,6 +80,14 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
         targetSelector.addGoal(1, new TargetIndebtedGoal<>(this, true));
     }
 
+    public int getGovID() {
+        return govID;
+    }
+
+    public void setGovID(int id) {
+        govID = id;
+    }
+
     @Override
     public ActionResultType interactAt(PlayerEntity player, Vector3d hit, Hand hand) {
         if (player instanceof ServerPlayerEntity && hand == Hand.MAIN_HAND) {
@@ -94,9 +106,10 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
                     }
                     if (player.getRandom().nextDouble() < ServerConfigs.INSTANCE.bribeSuccessRate.get()) {
                         Debt.get(player).clear();
+                        WorldRelationData.multiplyShare(player.getServer(), getGovID(), player.getUUID(), 1.5);
                         level.broadcastEntityEvent(this, (byte) 0);
                     } else {
-                        Debt.add(player);
+                        Debt.add(player, getTaxRate((ServerPlayerEntity) player));
                         level.broadcastEntityEvent(this, (byte) 1);
                     }
                     return ActionResultType.CONSUME;
@@ -127,6 +140,12 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
         }
     }
 
+    public double getTaxRate(ServerPlayerEntity player) {
+        double share = WorldRelationData.getRelativeShare(player.getServer(), govID, player.getUUID());
+        double base = ServerConfigs.INSTANCE.taxRate.get();
+        return base / share;
+    }
+
     @Override
     public void handleEntityEvent(byte val) {
         if (val == 0) {
@@ -147,6 +166,20 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
             super.handleEntityEvent(val);
         }
 
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundNBT tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putInt("GovID", getGovID());
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundNBT tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains("GovID", Constants.NBT.TAG_INT)) {
+            setGovID(tag.getInt("GovID"));
+        }
     }
 
     private class LookAtPayerGoal extends LookAtGoal {
