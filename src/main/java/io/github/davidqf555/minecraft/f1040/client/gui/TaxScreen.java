@@ -49,9 +49,9 @@ public class TaxScreen extends Screen {
             Slot slot = items[i];
             int row = i / 9;
             int col = i % 9;
-            slot.y = startY + row * SLOT_HEIGHT;
+            slot.setY(startY + row * SLOT_HEIGHT);
             int rowWidth = Math.min(9, items.length - row * 9) * SLOT_WIDTH;
-            slot.x = x + (X_SIZE - rowWidth) / 2 + col * SLOT_WIDTH;
+            slot.setX(x + (X_SIZE - rowWidth) / 2 + col * SLOT_WIDTH);
             addRenderableWidget(slot);
         }
         addRenderableWidget(new PayButton(x + (X_SIZE - 40) / 2, y + Y_SIZE - 36, 40, 18));
@@ -111,9 +111,10 @@ public class TaxScreen extends Screen {
         }
 
         @Override
-        public void updateNarration(NarrationElementOutput output) {
+        protected void updateWidgetNarration(NarrationElementOutput output) {
             defaultButtonNarrationText(output);
         }
+
     }
 
     private class PayButton extends AbstractButton {
@@ -149,8 +150,10 @@ public class TaxScreen extends Screen {
         }
 
         @Override
-        public void updateNarration(NarrationElementOutput output) {
+        public void updateWidgetNarration(NarrationElementOutput output) {
             defaultButtonNarrationText(output);
         }
+
     }
+
 }
