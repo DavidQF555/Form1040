@@ -2,13 +2,13 @@ package io.github.davidqf555.minecraft.f1040.common.entities;
 
 import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
 import io.github.davidqf555.minecraft.f1040.common.world.data.GovernmentData;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -17,7 +17,7 @@ public class GiveLootGoal extends Goal {
 
     private final TaxCollectorEntity mob;
     private final double range, speed, within;
-    private PlayerEntity target;
+    private Player target;
 
     public GiveLootGoal(TaxCollectorEntity mob, double range, double speed) {
         this.mob = mob;
@@ -33,8 +33,8 @@ public class GiveLootGoal extends Goal {
             return false;
         }
         target = null;
-        for (PlayerEntity player : mob.level.getLoadedEntitiesOfClass(PlayerEntity.class, AxisAlignedBB.ofSize(range * 2, range * 2, range * 2).move(mob.position()))) {
-            if (GovernmentData.isCorrupted((ServerWorld) mob.level, mob.getGovID(), player.getUUID())) {
+        for (Player player : mob.level.getEntitiesOfClass(Player.class, AABB.ofSize(mob.position(), range * 2, range * 2, range * 2))) {
+            if (GovernmentData.isCorrupted((ServerLevel) mob.level, mob.getGovID(), player.getUUID())) {
                 target = player;
                 break;
             }
@@ -65,8 +65,8 @@ public class GiveLootGoal extends Goal {
     }
 
     protected boolean entitiesNearby() {
-        for (PlayerEntity player : mob.level.getLoadedEntitiesOfClass(PlayerEntity.class, AxisAlignedBB.ofSize(range * 2, range * 2, range * 2))) {
-            if (!player.equals(target) && player.canSee(target)) {
+        for (Player player : mob.level.getEntitiesOfClass(Player.class, AABB.ofSize(target.position(), range * 2, range * 2, range * 2))) {
+            if (!player.equals(target) && player.hasLineOfSight(target)) {
                 return true;
             }
         }
@@ -74,8 +74,8 @@ public class GiveLootGoal extends Goal {
     }
 
     protected void pay() {
-        Vector3d dir = target.position().subtract(mob.getEyePosition(1)).normalize();
-        List<ItemStack> items = GovernmentData.removeRandom((ServerWorld) mob.level, mob.getGovID(), mob.getRandom(), ServerConfigs.INSTANCE.lootProportion.get());
+        Vec3 dir = target.position().subtract(mob.getEyePosition(1)).normalize();
+        List<ItemStack> items = GovernmentData.removeRandom((ServerLevel) mob.level, mob.getGovID(), mob.getRandom(), ServerConfigs.INSTANCE.lootProportion.get());
         for (ItemStack stack : items) {
             ItemEntity item = new ItemEntity(mob.level, mob.getX(), mob.getEyeY(), mob.getZ(), stack);
             item.setDeltaMovement(item.getDeltaMovement().add(dir));

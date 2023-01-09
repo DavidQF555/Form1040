@@ -2,38 +2,38 @@ package io.github.davidqf555.minecraft.f1040.common.world.data;
 
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.Util;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldSavedData;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
-public class GovernmentData extends WorldSavedData {
+public class GovernmentData extends SavedData {
 
-    private static final ITextComponent[] NAMES = new ITextComponent[]{
-            new TranslationTextComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name1"))),
-            new TranslationTextComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name2"))),
-            new TranslationTextComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name3"))),
-            new TranslationTextComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name4"))),
-            new TranslationTextComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name5"))),
-            new TranslationTextComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name6"))),
-            new TranslationTextComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name7"))),
-            new TranslationTextComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name8"))),
-            new TranslationTextComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name9"))),
-            new TranslationTextComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name10"))),
+    private static final Component[] NAMES = new Component[]{
+            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name1"))),
+            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name2"))),
+            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name3"))),
+            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name4"))),
+            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name5"))),
+            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name6"))),
+            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name7"))),
+            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name8"))),
+            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name9"))),
+            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name10"))),
     };
     public static final int MAX = NAMES.length;
     private static final String NAME = Form1040.MOD_ID + "_Government";
@@ -41,14 +41,29 @@ public class GovernmentData extends WorldSavedData {
     private final GovernmentInventory[] inventories = new GovernmentInventory[MAX];
 
     public GovernmentData() {
-        super(NAME);
         for (int i = 0; i < MAX; i++) {
             relations[i] = new RelationData();
             inventories[i] = new GovernmentInventory();
         }
     }
 
-    public static ITextComponent getName(int id) {
+    public GovernmentData(CompoundTag tag) {
+        this();
+        if (tag.contains("Relations", Tag.TAG_LIST)) {
+            ListTag list = tag.getList("Relations", Tag.TAG_COMPOUND);
+            for (int i = 0; i < Math.min(list.size(), MAX); i++) {
+                relations[i].deserializeNBT(list.getCompound(i));
+            }
+        }
+        if (tag.contains("Inventories", Tag.TAG_LIST)) {
+            ListTag list = tag.getList("Inventories", Tag.TAG_COMPOUND);
+            for (int i = 0; i < Math.min(list.size(), MAX); i++) {
+                inventories[i].deserializeNBT(list.getCompound(i));
+            }
+        }
+    }
+
+    public static Component getName(int id) {
         return NAMES[id];
     }
 
@@ -56,7 +71,7 @@ public class GovernmentData extends WorldSavedData {
         return getOrCreate(server).relations[id].getRelativeShare(player);
     }
 
-    public static boolean isCorrupted(ServerWorld world, int id, UUID player) {
+    public static boolean isCorrupted(ServerLevel world, int id, UUID player) {
         return getRelativeShare(world.getServer(), id, player) >= ServerConfigs.INSTANCE.corruptionThreshold.get();
     }
 
@@ -64,21 +79,21 @@ public class GovernmentData extends WorldSavedData {
         getOrCreate(server).relations[id].multiplyShare(player, factor);
     }
 
-    public static void add(ServerWorld world, int id, Map<Item, Integer> items) {
+    public static void add(ServerLevel world, int id, Map<Item, Integer> items) {
         GovernmentInventory inventory = getOrCreate(world).get(id);
         items.forEach(inventory::add);
     }
 
-    public static List<ItemStack> removeRandom(ServerWorld world, int id, Random random, double factor) {
+    public static List<ItemStack> removeRandom(ServerLevel world, int id, Random random, double factor) {
         return getOrCreate(world).get(id).removeRandom(random, factor);
     }
 
-    public static GovernmentData getOrCreate(ServerWorld world) {
+    public static GovernmentData getOrCreate(ServerLevel world) {
         return getOrCreate(world.getServer());
     }
 
     public static GovernmentData getOrCreate(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(GovernmentData::new, NAME);
+        return server.overworld().getDataStorage().computeIfAbsent(GovernmentData::new, GovernmentData::new, NAME);
     }
 
     public GovernmentInventory get(int id) {
@@ -86,29 +101,13 @@ public class GovernmentData extends WorldSavedData {
     }
 
     @Override
-    public void load(CompoundNBT tag) {
-        if (tag.contains("Relations", Constants.NBT.TAG_LIST)) {
-            ListNBT list = tag.getList("Relations", Constants.NBT.TAG_COMPOUND);
-            for (int i = 0; i < Math.min(list.size(), MAX); i++) {
-                relations[i].deserializeNBT(list.getCompound(i));
-            }
-        }
-        if (tag.contains("Inventories", Constants.NBT.TAG_LIST)) {
-            ListNBT list = tag.getList("Inventories", Constants.NBT.TAG_COMPOUND);
-            for (int i = 0; i < Math.min(list.size(), MAX); i++) {
-                inventories[i].deserializeNBT(list.getCompound(i));
-            }
-        }
-    }
-
-    @Override
-    public CompoundNBT save(CompoundNBT tag) {
-        ListNBT relations = new ListNBT();
+    public CompoundTag save(CompoundTag tag) {
+        ListTag relations = new ListTag();
         for (RelationData relation : this.relations) {
             relations.add(relation.serializeNBT());
         }
         tag.put("Relations", relations);
-        ListNBT inventories = new ListNBT();
+        ListTag inventories = new ListTag();
         for (GovernmentInventory inventory : this.inventories) {
             inventories.add(inventory.serializeNBT());
         }
@@ -116,7 +115,7 @@ public class GovernmentData extends WorldSavedData {
         return tag;
     }
 
-    private static class GovernmentInventory implements INBTSerializable<CompoundNBT> {
+    private static class GovernmentInventory implements INBTSerializable<CompoundTag> {
 
         private final Map<Item, Integer> items = new HashMap<>();
 
@@ -124,7 +123,7 @@ public class GovernmentData extends WorldSavedData {
             NonNullList<ItemStack> out = NonNullList.create();
             for (Item key : items.keySet()) {
                 int count = items.get(key);
-                int amt = MathHelper.floor(count * factor * random.nextDouble());
+                int amt = Mth.floor(count * factor * random.nextDouble());
                 items.put(key, count - amt);
                 ItemStack stack = key.getDefaultInstance();
                 stack.setCount(amt);
@@ -138,16 +137,16 @@ public class GovernmentData extends WorldSavedData {
         }
 
         @Override
-        public CompoundNBT serializeNBT() {
-            CompoundNBT tag = new CompoundNBT();
+        public CompoundTag serializeNBT() {
+            CompoundTag tag = new CompoundTag();
             items.forEach((item, count) -> tag.putInt(item.getRegistryName().toString(), count));
             return tag;
         }
 
         @Override
-        public void deserializeNBT(CompoundNBT nbt) {
+        public void deserializeNBT(CompoundTag nbt) {
             for (String key : nbt.getAllKeys()) {
-                if (nbt.contains(key, Constants.NBT.TAG_INT)) {
+                if (nbt.contains(key, Tag.TAG_INT)) {
                     int count = nbt.getInt(key);
                     Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(key));
                     add(item, count);
@@ -157,7 +156,7 @@ public class GovernmentData extends WorldSavedData {
 
     }
 
-    private static class RelationData implements INBTSerializable<CompoundNBT> {
+    private static class RelationData implements INBTSerializable<CompoundTag> {
 
         private final Map<UUID, Double> relation = new HashMap<>();
 
@@ -187,16 +186,16 @@ public class GovernmentData extends WorldSavedData {
         }
 
         @Override
-        public CompoundNBT serializeNBT() {
-            CompoundNBT tag = new CompoundNBT();
+        public CompoundTag serializeNBT() {
+            CompoundTag tag = new CompoundTag();
             relation.forEach((id, value) -> tag.putDouble(id.toString(), value));
             return tag;
         }
 
         @Override
-        public void deserializeNBT(CompoundNBT nbt) {
+        public void deserializeNBT(CompoundTag nbt) {
             for (String id : nbt.getAllKeys()) {
-                if (nbt.contains(id, Constants.NBT.TAG_DOUBLE)) {
+                if (nbt.contains(id, Tag.TAG_DOUBLE)) {
                     relation.put(UUID.fromString(id), nbt.getDouble(id));
                 }
             }

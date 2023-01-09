@@ -1,7 +1,7 @@
 package io.github.davidqf555.minecraft.f1040.common.player;
 
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.Tag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -10,7 +10,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class NBTCapabilityProvider<T extends INBT, M extends INBTSerializable<T>> implements ICapabilitySerializable<T> {
+public class NBTCapabilityProvider<T extends Tag, M extends INBTSerializable<T>> implements ICapabilitySerializable<T> {
 
     private final Capability<M> capability;
     private final M instance;

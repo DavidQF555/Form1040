@@ -1,20 +1,21 @@
 package io.github.davidqf555.minecraft.f1040.common.player;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
-import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class GovernmentRelations implements INBTSerializable<CompoundNBT> {
+public class GovernmentRelations implements INBTSerializable<CompoundTag> {
 
-    @CapabilityInject(GovernmentRelations.class)
-    public static Capability<GovernmentRelations> capability = null;
+    public static final Capability<GovernmentRelations> CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {
+    });
     private double taxFactor = 1;
 
-    public static GovernmentRelations get(PlayerEntity player) {
-        return player.getCapability(capability).orElseThrow(NullPointerException::new);
+    public static GovernmentRelations get(Player player) {
+        return player.getCapability(CAPABILITY).orElseThrow(NullPointerException::new);
     }
 
     public double getTaxFactor() {
@@ -26,15 +27,15 @@ public class GovernmentRelations implements INBTSerializable<CompoundNBT> {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT tag = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
         tag.putDouble("Tax", getTaxFactor());
         return tag;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
-        if (nbt.contains("Tax", Constants.NBT.TAG_DOUBLE)) {
+    public void deserializeNBT(CompoundTag nbt) {
+        if (nbt.contains("Tax", Tag.TAG_DOUBLE)) {
             setTaxFactor(nbt.getDouble("Tax"));
         }
     }
