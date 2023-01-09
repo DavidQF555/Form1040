@@ -4,13 +4,20 @@ import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
 import io.github.davidqf555.minecraft.f1040.common.packets.OpenTaxScreenPacket;
 import io.github.davidqf555.minecraft.f1040.common.player.Debt;
+import io.github.davidqf555.minecraft.f1040.common.player.GovernmentRelations;
+import io.github.davidqf555.minecraft.f1040.common.world.data.GovernmentData;
 import io.github.davidqf555.minecraft.f1040.registration.TagRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -25,16 +32,20 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Random;
 
 public class TaxCollectorEntity extends PathfinderMob implements Npc {
 
     private Player trading;
+    private int govID;
+    private boolean payed;
 
     public TaxCollectorEntity(EntityType<? extends PathfinderMob> type, Level world) {
         super(type, world);
@@ -70,15 +81,40 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
     }
 
     @Override
+    public void tick() {
+        super.tick();
+        if (tickCount >= ServerConfigs.INSTANCE.taxPeriod.get()) {
+            remove(RemovalReason.DISCARDED);
+        }
+    }
+
+    @Nullable
+    @Override
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawn, @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
+        setGovID(getRandom().nextInt(GovernmentData.MAX));
+        setCustomName(GovernmentData.getName(getGovID()));
+        return super.finalizeSpawn(world, difficulty, spawn, data, tag);
+    }
+
+    @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(1, new LookAtPayerGoal());
         goalSelector.addGoal(2, new MeleeAttackGoal(this, 1, true));
+        goalSelector.addGoal(3, new GiveLootGoal(this, 32, 1));
         goalSelector.addGoal(3, new FollowPlayersGoal(this, 1, 4, 16));
         goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6));
         goalSelector.addGoal(5, new RandomLookAroundGoal(this));
         targetSelector.addGoal(0, new HurtByTargetGoal(this));
         targetSelector.addGoal(1, new TargetIndebtedGoal<>(this, true));
+    }
+
+    public int getGovID() {
+        return govID;
+    }
+
+    public void setGovID(int id) {
+        govID = id;
     }
 
     @Override
@@ -97,11 +133,12 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
                     if (!player.isCreative()) {
                         item.shrink(1);
                     }
-                    if (player.getRandom().nextDouble() < ServerConfigs.INSTANCE.bribeSuccessRate.get()) {
+                    if (player.getRandom().nextDouble() < getBribeRate((ServerPlayer) player)) {
                         Debt.get(player).clear();
+                        GovernmentData.multiplyShare(player.getServer(), getGovID(), player.getUUID(), 1.5);
                         level.broadcastEntityEvent(this, (byte) 0);
                     } else {
-                        Debt.add(player);
+                        Debt.add(player, getTaxRate((ServerPlayer) player));
                         level.broadcastEntityEvent(this, (byte) 1);
                     }
                     return InteractionResult.CONSUME;
@@ -124,12 +161,32 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
         trading = player;
     }
 
+    public boolean hasPayed() {
+        return payed;
+    }
+
+    public void setPayed(boolean payed) {
+        this.payed = payed;
+    }
+
     @Override
     public void aiStep() {
         super.aiStep();
         if (tickCount >= ServerConfigs.INSTANCE.taxPeriod.get()) {
             remove(RemovalReason.DISCARDED);
         }
+    }
+
+    public double getTaxRate(ServerPlayer player) {
+        double share = GovernmentData.getRelativeShare(player.getServer(), govID, player.getUUID());
+        double base = ServerConfigs.INSTANCE.taxRate.get() * GovernmentRelations.get(player).getTaxFactor();
+        return base / share;
+    }
+
+    public double getBribeRate(ServerPlayer player) {
+        double share = GovernmentData.getRelativeShare(player.getServer(), govID, player.getUUID());
+        double base = ServerConfigs.INSTANCE.bribeSuccessRate.get();
+        return Math.min(1, base * (0.5 + share));
     }
 
     @Override
@@ -148,10 +205,54 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
                 double dZ = random.nextGaussian() * 0.02;
                 level.addParticle(ParticleTypes.ANGRY_VILLAGER, getRandomX(1), getRandomY() + 0.5, getRandomZ(1), dX, dY, dZ);
             }
+        } else if (val == 56) {
+            for (int i = 0; i < 7; i++) {
+                double dX = random.nextGaussian() * 0.02;
+                double dY = random.nextGaussian() * 0.02;
+                double dZ = random.nextGaussian() * 0.02;
+                level.addParticle(ParticleTypes.SQUID_INK, getRandomX(1), getRandomY() + 0.5, getRandomZ(1), dX, dY, dZ);
+            }
         } else {
             super.handleEntityEvent(val);
         }
 
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putInt("GovID", getGovID());
+        tag.putBoolean("Payed", hasPayed());
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains("GovID", Tag.TAG_INT)) {
+            setGovID(tag.getInt("GovID"));
+        }
+        if (tag.contains("Payed", Tag.TAG_BYTE)) {
+            setPayed(tag.getBoolean("Payed"));
+        }
+    }
+
+    @Override
+    protected void dropCustomDeathLoot(DamageSource source, int looting, boolean player) {
+        super.dropCustomDeathLoot(source, looting, player);
+        if (player && level instanceof ServerLevel) {
+            List<ItemStack> items = GovernmentData.removeRandom((ServerLevel) level, getGovID(), getRandom(), ServerConfigs.INSTANCE.inventoryDropProportion.get());
+            items.forEach(this::spawnAtLocation);
+        }
+    }
+
+    @Override
+    public void killed(ServerLevel world, LivingEntity entity) {
+        super.killed(world, entity);
+        if (entity instanceof Player) {
+            GovernmentRelations relations = GovernmentRelations.get((Player) entity);
+            relations.setTaxFactor(relations.getTaxFactor() * ServerConfigs.INSTANCE.taxIncreaseRate.get());
+            GovernmentData.multiplyShare(world.getServer(), getGovID(), entity.getUUID(), 0.5);
+        }
     }
 
     private class LookAtPayerGoal extends LookAtPlayerGoal {
@@ -160,6 +261,7 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
             super(TaxCollectorEntity.this, Player.class, 8);
         }
 
+        @Override
         public boolean canUse() {
             Player player = getTradingPlayer();
             if (player == null) {
@@ -170,4 +272,5 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
             }
         }
     }
+
 }

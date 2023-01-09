@@ -1,10 +1,11 @@
 package io.github.davidqf555.minecraft.f1040.common.player;
 
 import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
+import io.github.davidqf555.minecraft.f1040.common.world.data.GovernmentData;
 import io.github.davidqf555.minecraft.f1040.registration.TagRegistry;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
@@ -13,13 +14,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +40,7 @@ public class Debt implements INBTSerializable<CompoundTag> {
         return get(player).isIndebted();
     }
 
-    public static boolean add(Player player) {
+    public static boolean add(Player player, double rate) {
         Map<Item, Integer> unique = new HashMap<>();
         for (ItemStack stack : player.getInventory().items) {
             if (!stack.isEmpty() && !stack.is(TagRegistry.TAX_EXEMPT)) {
@@ -52,7 +49,6 @@ public class Debt implements INBTSerializable<CompoundTag> {
             }
         }
         if (!unique.isEmpty()) {
-            double rate = ServerConfigs.INSTANCE.taxRate.get();
             if (ServerConfigs.INSTANCE.roundUp.get()) {
                 Item rand = List.copyOf(unique.keySet()).get(player.getRandom().nextInt(unique.size()));
                 get(player).addDebt(rand, Mth.ceil(unique.get(rand) * rate));
@@ -74,12 +70,17 @@ public class Debt implements INBTSerializable<CompoundTag> {
         return false;
     }
 
-    public static void pay(Player player) {
+    public static void pay(Player player, int id) {
         Debt debt = get(player);
         for (Item item : debt.getAllDebt()) {
             ContainerHelper.clearOrCountMatchingItems(player.getInventory(), stack -> stack.getItem().equals(item), debt.getDebt(item), false);
         }
+        Map<Item, Integer> items = new HashMap<>();
+        debt.getAllDebt().forEach(item -> items.put(item, debt.getDebt(item)));
+        GovernmentData.add((ServerLevel) player.level, id, items);
         debt.clear();
+        GovernmentRelations relations = GovernmentRelations.get(player);
+        relations.setTaxFactor(relations.getTaxFactor() * ServerConfigs.INSTANCE.taxDecreaseRate.get());
     }
 
     public static boolean canPay(Player player) {
@@ -133,26 +134,4 @@ public class Debt implements INBTSerializable<CompoundTag> {
         }
     }
 
-    public static class Provider implements ICapabilitySerializable<CompoundTag> {
-
-        private final LazyOptional<Debt> debt = LazyOptional.of(Debt::new);
-
-        @Nonnull
-        @Override
-        public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-            return cap == Debt.CAPABILITY ? debt.cast() : LazyOptional.empty();
-        }
-
-        @Override
-        public CompoundTag serializeNBT() {
-            return debt.orElseThrow(NullPointerException::new).serializeNBT();
-        }
-
-        @Override
-        public void deserializeNBT(CompoundTag nbt) {
-            debt.orElseThrow(NullPointerException::new).deserializeNBT(nbt);
-        }
-    }
-
-    ;
 }

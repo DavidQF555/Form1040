@@ -3,6 +3,7 @@ package io.github.davidqf555.minecraft.f1040.common.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
+import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
 import io.github.davidqf555.minecraft.f1040.common.player.Debt;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -48,7 +49,7 @@ public final class TaxCommand {
         for (ServerPlayer player : targets) {
             boolean added = false;
             for (int i = 0; i < amount; i++) {
-                if (Debt.add(player) && !added) {
+                if (Debt.add(player, ServerConfigs.INSTANCE.taxRate.get()) && !added) {
                     success++;
                     added = true;
                 }
