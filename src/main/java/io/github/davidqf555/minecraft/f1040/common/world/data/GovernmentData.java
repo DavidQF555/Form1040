@@ -8,32 +8,35 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class GovernmentData extends SavedData {
 
     private static final Component[] NAMES = new Component[]{
-            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name1"))),
-            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name2"))),
-            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name3"))),
-            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name4"))),
-            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name5"))),
-            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name6"))),
-            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name7"))),
-            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name8"))),
-            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name9"))),
-            new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name10"))),
+            Component.translatable(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name1"))),
+            Component.translatable(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name2"))),
+            Component.translatable(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name3"))),
+            Component.translatable(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name4"))),
+            Component.translatable(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name5"))),
+            Component.translatable(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name6"))),
+            Component.translatable(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name7"))),
+            Component.translatable(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name8"))),
+            Component.translatable(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name9"))),
+            Component.translatable(Util.makeDescriptionId("entity", new ResourceLocation(Form1040.MOD_ID, "gov.name10"))),
     };
     public static final int MAX = NAMES.length;
     private static final String NAME = Form1040.MOD_ID + "_Government";
@@ -84,7 +87,7 @@ public class GovernmentData extends SavedData {
         items.forEach(inventory::add);
     }
 
-    public static List<ItemStack> removeRandom(ServerLevel world, int id, Random random, double factor) {
+    public static List<ItemStack> removeRandom(ServerLevel world, int id, RandomSource random, double factor) {
         return getOrCreate(world).get(id).removeRandom(random, factor);
     }
 
@@ -119,7 +122,7 @@ public class GovernmentData extends SavedData {
 
         private final Map<Item, Integer> items = new HashMap<>();
 
-        private NonNullList<ItemStack> removeRandom(Random random, double factor) {
+        private NonNullList<ItemStack> removeRandom(RandomSource random, double factor) {
             NonNullList<ItemStack> out = NonNullList.create();
             for (Item key : items.keySet()) {
                 int count = items.get(key);
@@ -139,7 +142,7 @@ public class GovernmentData extends SavedData {
         @Override
         public CompoundTag serializeNBT() {
             CompoundTag tag = new CompoundTag();
-            items.forEach((item, count) -> tag.putInt(item.getRegistryName().toString(), count));
+            items.forEach((item, count) -> tag.putInt(ForgeRegistries.ITEMS.getKey(item).toString(), count));
             return tag;
         }
 
