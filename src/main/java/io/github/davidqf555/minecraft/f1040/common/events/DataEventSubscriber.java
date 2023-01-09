@@ -4,6 +4,8 @@ import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
 import io.github.davidqf555.minecraft.f1040.common.items.OffshoreBankAccountInventory;
 import io.github.davidqf555.minecraft.f1040.common.player.Debt;
+import io.github.davidqf555.minecraft.f1040.common.player.GovernmentRelations;
+import io.github.davidqf555.minecraft.f1040.common.player.NBTCapabilityProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -18,6 +20,7 @@ import net.minecraftforge.fml.common.Mod;
 public final class DataEventSubscriber {
 
     private static final ResourceLocation DEBT = new ResourceLocation(Form1040.MOD_ID, "debt");
+    private static final ResourceLocation GOVERNMENT_RELATIONS = new ResourceLocation(Form1040.MOD_ID, "government_relations");
 
     private DataEventSubscriber() {
     }
@@ -34,7 +37,8 @@ public final class DataEventSubscriber {
     @SubscribeEvent
     public static void onAttachPlayerCapabilities(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof Player) {
-            event.addCapability(DEBT, new Debt.Provider());
+            event.addCapability(DEBT, new NBTCapabilityProvider<>(Debt.CAPABILITY, new Debt()));
+            event.addCapability(GOVERNMENT_RELATIONS, new NBTCapabilityProvider<>(GovernmentRelations.CAPABILITY, new GovernmentRelations()));
         }
     }
 
@@ -48,6 +52,7 @@ public final class DataEventSubscriber {
         public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
             event.register(Debt.class);
             event.register(OffshoreBankAccountInventory.class);
+            event.register(GovernmentRelations.class);
         }
 
     }

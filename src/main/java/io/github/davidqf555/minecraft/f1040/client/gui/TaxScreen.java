@@ -143,7 +143,7 @@ public class TaxScreen extends Screen {
         @Override
         public void onPress() {
             if (canPay) {
-                Form1040.CHANNEL.sendToServer(new PayTaxesPacket());
+                Form1040.CHANNEL.sendToServer(new PayTaxesPacket(collector));
                 onClose();
             }
         }

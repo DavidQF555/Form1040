@@ -15,12 +15,13 @@ public final class ContainerRegistry {
     public static final DeferredRegister<MenuType<?>> TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES, Form1040.MOD_ID);
 
     private ContainerRegistry() {
-    }    public static final RegistryObject<MenuType<OffshoreBankAccountContainer>> OFFSHORE_BANK_ACCOUNT = register("offshore_bank_account", OffshoreBankAccountContainer::new);
+    }
 
     private static <T extends AbstractContainerMenu> RegistryObject<MenuType<T>> register(String name, IContainerFactory<T> factory) {
         return TYPES.register(name, () -> IForgeMenuType.create(factory));
     }
 
+    public static final RegistryObject<MenuType<OffshoreBankAccountContainer>> OFFSHORE_BANK_ACCOUNT = register("offshore_bank_account", OffshoreBankAccountContainer::new);
 
 
 }
