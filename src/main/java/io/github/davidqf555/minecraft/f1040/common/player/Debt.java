@@ -1,28 +1,30 @@
 package io.github.davidqf555.minecraft.f1040.common.player;
 
 import io.github.davidqf555.minecraft.f1040.common.ServerConfigs;
+import io.github.davidqf555.minecraft.f1040.common.world.data.GovernmentData;
 import io.github.davidqf555.minecraft.f1040.registration.TagRegistry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
-import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class Debt implements INBTSerializable<CompoundNBT> {
 
+    @CapabilityInject(Debt.class)
+    public static Capability<Debt> capability = null;
     private final Map<Item, Integer> debt;
 
     public Debt() {
@@ -30,14 +32,14 @@ public class Debt implements INBTSerializable<CompoundNBT> {
     }
 
     public static Debt get(PlayerEntity player) {
-        return player.getCapability(Provider.capability).orElseGet(Debt::new);
+        return player.getCapability(capability).orElseGet(Debt::new);
     }
 
     public static boolean isIndebted(PlayerEntity player) {
         return get(player).isIndebted();
     }
 
-    public static boolean add(PlayerEntity player) {
+    public static boolean add(PlayerEntity player, double rate) {
         Map<Item, Integer> unique = new HashMap<>();
         for (ItemStack stack : player.inventory.items) {
             if (!stack.isEmpty()) {
@@ -48,7 +50,6 @@ public class Debt implements INBTSerializable<CompoundNBT> {
             }
         }
         if (!unique.isEmpty()) {
-            double rate = ServerConfigs.INSTANCE.taxRate.get();
             if (ServerConfigs.INSTANCE.roundUp.get()) {
                 Item rand = new ArrayList<>(unique.keySet()).get(player.getRandom().nextInt(unique.size()));
                 get(player).addDebt(rand, MathHelper.ceil(unique.get(rand) * rate));
@@ -70,12 +71,17 @@ public class Debt implements INBTSerializable<CompoundNBT> {
         return false;
     }
 
-    public static void pay(PlayerEntity player) {
+    public static void pay(PlayerEntity player, int id) {
         Debt debt = get(player);
         for (Item item : debt.getAllDebt()) {
             ItemStackHelper.clearOrCountMatchingItems(player.inventory, stack -> stack.getItem().equals(item), debt.getDebt(item), false);
         }
+        Map<Item, Integer> items = new HashMap<>();
+        debt.getAllDebt().forEach(item -> items.put(item, debt.getDebt(item)));
+        GovernmentData.add((ServerWorld) player.level, id, items);
         debt.clear();
+        GovernmentRelations relations = GovernmentRelations.get(player);
+        relations.setTaxFactor(relations.getTaxFactor() * ServerConfigs.INSTANCE.taxDecreaseRate.get());
     }
 
     public static boolean canPay(PlayerEntity player) {
@@ -129,39 +135,4 @@ public class Debt implements INBTSerializable<CompoundNBT> {
         }
     }
 
-    public static class Provider implements ICapabilitySerializable<INBT> {
-
-        @CapabilityInject(Debt.class)
-        public static Capability<Debt> capability = null;
-        private final LazyOptional<Debt> instance = LazyOptional.of(() -> Objects.requireNonNull(capability.getDefaultInstance()));
-
-        @Nonnull
-        @Override
-        public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, Direction side) {
-            return cap == capability ? instance.cast() : LazyOptional.empty();
-        }
-
-        @Override
-        public INBT serializeNBT() {
-            return capability.getStorage().writeNBT(capability, instance.orElseThrow(NullPointerException::new), null);
-        }
-
-        @Override
-        public void deserializeNBT(INBT nbt) {
-            capability.getStorage().readNBT(capability, instance.orElseThrow(NullPointerException::new), null, nbt);
-        }
-    }
-
-    public static class Storage implements Capability.IStorage<Debt> {
-
-        @Override
-        public INBT writeNBT(Capability<Debt> capability, Debt instance, Direction side) {
-            return instance.serializeNBT();
-        }
-
-        @Override
-        public void readNBT(Capability<Debt> capability, Debt instance, Direction side, INBT nbt) {
-            instance.deserializeNBT((CompoundNBT) nbt);
-        }
-    }
 }

@@ -14,7 +14,7 @@ public class ServerConfigs {
         SPEC = pair.getRight();
     }
 
-    public final ForgeConfigSpec.DoubleValue taxRate, shadyBankerRate, bribeSuccessRate;
+    public final ForgeConfigSpec.DoubleValue taxRate, shadyBankerRate, bribeSuccessRate, inventoryDropProportion, taxIncreaseRate, taxDecreaseRate, corruptionThreshold, lootProportion;
     public final ForgeConfigSpec.IntValue indebtedAmt, villageRange, ironGolemCount, taxCollectorMin, taxCollectorMax;
     public final ForgeConfigSpec.BooleanValue roundUp, persistent;
     public final ForgeConfigSpec.LongValue taxPeriod;
@@ -43,6 +43,16 @@ public class ServerConfigs {
                 .defineInRange("shadyBankerRate", 0.2, 0, 1);
         bribeSuccessRate = builder.comment("This is the chance that bribing a Tax Collector is successful. ")
                 .defineInRange("bribeSuccessRate", 0.25, 0, 1);
+        inventoryDropProportion = builder.comment("This is the proportion of their inventory a tax collector drops on death. ")
+                .defineInRange("inventoryDropProportion", 0.25, 0, 2);
+        taxIncreaseRate = builder.comment("This is the proportion the tax rate changes whenever a tax collector is killed. ")
+                .defineInRange("taxIncreaseRate", 1.5, 0.1, Double.MAX_VALUE);
+        taxDecreaseRate = builder.comment("This is the proportion the tax rate changes whenever tax is payed. ")
+                .defineInRange("taxDecreaseRate", 0.95, 0.1, Double.MAX_VALUE);
+        corruptionThreshold = builder.comment("This is the proportion of relations needed to corrupt a tax collector. ")
+                .defineInRange("corruptionThreshold", 0, 0.75, 1);
+        lootProportion = builder.comment("This is the proportion of their inventory corrupted tax collectors pay. ")
+                .defineInRange("lootProportion", 0, 0.25, Double.MAX_VALUE);
         builder.pop();
     }
 }

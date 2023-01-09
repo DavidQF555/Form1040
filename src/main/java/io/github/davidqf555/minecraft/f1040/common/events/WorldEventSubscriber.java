@@ -11,6 +11,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.SectionPos;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.TickEvent;
@@ -38,15 +39,18 @@ public final class WorldEventSubscriber {
             event.world.players().forEach(player -> {
                 if (!player.isCreative() && !player.isSpectator()) {
                     if (ServerConfigs.INSTANCE.villageRange.get() == -1 || ((ServerWorld) event.world).sectionsToVillage(SectionPos.of(player)) <= SectionPos.blockToSection(ServerConfigs.INSTANCE.villageRange.get())) {
-                        Debt.add(player);
                         int min = ServerConfigs.INSTANCE.taxCollectorMin.get();
                         int max = ServerConfigs.INSTANCE.taxCollectorMax.get();
-                        TaxCollectorEntity.spawn(player, EntityRegistry.TAX_COLLECTOR.get(), min, max);
-                        if (Debt.isIndebted(player)) {
-                            for (int i = 0; i < ServerConfigs.INSTANCE.ironGolemCount.get(); i++) {
-                                TaxCollectorEntity.spawn(player, EntityType.IRON_GOLEM, min, max);
+                        TaxCollectorEntity collector = TaxCollectorEntity.spawn(player, EntityRegistry.TAX_COLLECTOR.get(), min, max);
+                        if (collector != null) {
+                            Debt.add(player, collector.getTaxRate((ServerPlayerEntity) player));
+                            if (Debt.isIndebted(player)) {
+                                for (int i = 0; i < ServerConfigs.INSTANCE.ironGolemCount.get(); i++) {
+                                    TaxCollectorEntity.spawn(player, EntityType.IRON_GOLEM, min, max);
+                                }
                             }
                         }
+
                         if (player.getRandom().nextDouble() < ServerConfigs.INSTANCE.shadyBankerRate.get()) {
                             ShadyBankerEntity entity = TaxCollectorEntity.spawn(player, EntityRegistry.SHADY_BANKER.get(), min, max);
                             if (entity != null) {
