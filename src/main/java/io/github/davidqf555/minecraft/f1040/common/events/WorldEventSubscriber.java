@@ -6,7 +6,6 @@ import io.github.davidqf555.minecraft.f1040.common.entities.ShadyBankerEntity;
 import io.github.davidqf555.minecraft.f1040.common.entities.TargetIndebtedGoal;
 import io.github.davidqf555.minecraft.f1040.common.entities.TaxCollectorEntity;
 import io.github.davidqf555.minecraft.f1040.common.player.Debt;
-import io.github.davidqf555.minecraft.f1040.common.world.data.WorldRelationData;
 import io.github.davidqf555.minecraft.f1040.registration.EntityRegistry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -44,8 +43,6 @@ public final class WorldEventSubscriber {
                         int max = ServerConfigs.INSTANCE.taxCollectorMax.get();
                         TaxCollectorEntity collector = TaxCollectorEntity.spawn(player, EntityRegistry.TAX_COLLECTOR.get(), min, max);
                         if (collector != null) {
-                            collector.setGovID(player.getRandom().nextInt(WorldRelationData.MAX));
-                            collector.setCustomName(WorldRelationData.getName(collector.getGovID()));
                             Debt.add(player, collector.getTaxRate((ServerPlayerEntity) player));
                             if (Debt.isIndebted(player)) {
                                 for (int i = 0; i < ServerConfigs.INSTANCE.ironGolemCount.get(); i++) {
