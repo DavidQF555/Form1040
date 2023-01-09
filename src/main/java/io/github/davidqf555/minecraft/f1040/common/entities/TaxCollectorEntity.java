@@ -97,9 +97,9 @@ public class TaxCollectorEntity extends CreatureEntity implements INPC {
         goalSelector.addGoal(1, new LookAtPayerGoal());
         goalSelector.addGoal(2, new MeleeAttackGoal(this, 1, true));
         goalSelector.addGoal(3, new GiveLootGoal(this, 32, 1));
-        goalSelector.addGoal(3, new FollowPlayersGoal(this, 1, 4, 16));
-        goalSelector.addGoal(4, new LookAtGoal(this, PlayerEntity.class, 6));
-        goalSelector.addGoal(5, new LookRandomlyGoal(this));
+        goalSelector.addGoal(4, new FollowPlayersGoal(this, 1, 4, 16));
+        goalSelector.addGoal(5, new LookAtGoal(this, PlayerEntity.class, 6));
+        goalSelector.addGoal(6, new LookRandomlyGoal(this));
         targetSelector.addGoal(0, new HurtByTargetGoal(this));
         targetSelector.addGoal(1, new TargetIndebtedGoal<>(this, true));
     }
