@@ -65,7 +65,7 @@ public class GiveLootGoal extends Goal {
     }
 
     protected boolean entitiesNearby() {
-        for (PlayerEntity player : mob.level.getLoadedEntitiesOfClass(PlayerEntity.class, AxisAlignedBB.ofSize(range * 2, range * 2, range * 2))) {
+        for (PlayerEntity player : mob.level.getLoadedEntitiesOfClass(PlayerEntity.class, AxisAlignedBB.ofSize(range * 2, range * 2, range * 2).move(target.position()))) {
             if (!player.equals(target) && player.canSee(target)) {
                 return true;
             }
