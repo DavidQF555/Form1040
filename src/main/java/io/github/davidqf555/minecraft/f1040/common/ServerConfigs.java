@@ -16,7 +16,7 @@ public class ServerConfigs {
 
     public final ForgeConfigSpec.DoubleValue taxRate, shadyBankerRate, bribeSuccessRate, inventoryDropProportion, taxIncreaseRate, taxDecreaseRate, corruptionThreshold, lootProportion;
     public final ForgeConfigSpec.IntValue indebtedAmt, villageRange, ironGolemCount, taxCollectorMin, taxCollectorMax;
-    public final ForgeConfigSpec.BooleanValue roundUp, persistent;
+    public final ForgeConfigSpec.BooleanValue roundUp, persistent, invertExempt;
     public final ForgeConfigSpec.LongValue taxPeriod;
 
     public ServerConfigs(ForgeConfigSpec.Builder builder) {
@@ -30,6 +30,8 @@ public class ServerConfigs {
                 .defineInRange("taxDecreaseRate", 0.95, 0.1, Double.MAX_VALUE);
         taxPeriod = builder.comment("This is the period in between the time that players are taxed. ")
                 .defineInRange("period", 24000, 1, Long.MAX_VALUE);
+        invertExempt = builder.comment("This is whether the tax exempt tag is inverted so that only items in it are taxed. ")
+                .define("invertExempt", false);
         builder.pop();
         builder.push("Debt");
         indebtedAmt = builder.comment("This is the number of different taxed items for each player that are required for tax collectors and iron golems to attack them. ")

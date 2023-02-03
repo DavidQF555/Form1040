@@ -84,7 +84,7 @@ public class Debt implements INBTSerializable<CompoundNBT> {
     }
 
     public static int getTaxedAmount(Item item, int count, double rate) {
-        if (TagRegistry.TAX_EXEMPT.contains(item)) {
+        if (ServerConfigs.INSTANCE.invertExempt.get() ^ TagRegistry.TAX_EXEMPT.contains(item)) {
             return 0;
         }
         if (ServerConfigs.INSTANCE.roundUp.get()) {
