@@ -4,7 +4,7 @@ plugins {
     id 'net.minecraftforge.gradle' version '5.+'
 }
 
-version = '1.19.3-2.0.0'
+version = '1.19.3-2.1.0'
 group = 'io.github.davidqf555.minecraft.f1040'
 archivesBaseName = 'f1040'
 

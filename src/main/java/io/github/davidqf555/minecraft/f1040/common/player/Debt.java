@@ -41,33 +41,27 @@ public class Debt implements INBTSerializable<CompoundTag> {
     }
 
     public static boolean add(Player player, double rate) {
-        Map<Item, Integer> unique = new HashMap<>();
+        Map<Item, Integer> items = new HashMap<>();
         for (ItemStack stack : player.getInventory().items) {
-            if (!stack.isEmpty() && !stack.is(TagRegistry.TAX_EXEMPT)) {
+            if (!stack.isEmpty()) {
                 Item item = stack.getItem();
-                unique.put(item, unique.getOrDefault(item, 0) + stack.getCount());
+                items.put(item, items.getOrDefault(item, 0) + stack.getCount());
             }
         }
-        if (!unique.isEmpty()) {
-            if (ServerConfigs.INSTANCE.roundUp.get()) {
-                Item rand = List.copyOf(unique.keySet()).get(player.getRandom().nextInt(unique.size()));
-                get(player).addDebt(rand, Mth.ceil(unique.get(rand) * rate));
-                return true;
+        Map<Item, Integer> tax = new HashMap<>();
+        items.forEach((item, count) -> {
+            int amt = getTaxedAmount(item, count, rate);
+            if (amt > 0) {
+                tax.put(item, amt);
             }
-            Map<Item, Integer> tax = new HashMap<>();
-            for (Map.Entry<Item, Integer> entry : unique.entrySet()) {
-                int total = (int) (entry.getValue() * rate);
-                if (total >= 1) {
-                    tax.put(entry.getKey(), total);
-                }
-            }
-            if (!tax.isEmpty()) {
-                Item rand = List.copyOf(tax.keySet()).get(player.getRandom().nextInt(tax.size()));
-                get(player).addDebt(rand, tax.get(rand));
-                return true;
-            }
+        });
+        if (tax.isEmpty()) {
+            return false;
         }
-        return false;
+        List<Item> keys = List.copyOf(tax.keySet());
+        Item item = keys.get(player.getRandom().nextInt(keys.size()));
+        get(player).addDebt(item, tax.get(item));
+        return true;
     }
 
     public static void pay(Player player, int id) {
@@ -91,6 +85,17 @@ public class Debt implements INBTSerializable<CompoundTag> {
             }
         }
         return true;
+    }
+
+    @SuppressWarnings("deprecation")
+    public static int getTaxedAmount(Item item, int count, double rate) {
+        if (ServerConfigs.INSTANCE.invertExempt.get() ^ item.builtInRegistryHolder().is(TagRegistry.TAX_EXEMPT)) {
+            return 0;
+        }
+        if (ServerConfigs.INSTANCE.roundUp.get()) {
+            return Mth.ceil(count * rate);
+        }
+        return Mth.floor(count * rate);
     }
 
     public boolean isIndebted() {
