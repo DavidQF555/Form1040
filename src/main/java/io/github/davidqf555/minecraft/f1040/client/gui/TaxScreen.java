@@ -100,6 +100,8 @@ public class TaxScreen extends Screen {
 
         @Override
         public void renderButton(PoseStack matrix, int mouseX, int mouseY, float partial) {
+            int x = getX();
+            int y = getY();
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, TEXTURE);
             blit(matrix, x, y, 120, 166, width, height, TEXTURE_WIDTH, TEXTURE_HEIGHT);
@@ -135,6 +137,8 @@ public class TaxScreen extends Screen {
                 xStart = 80;
                 color = 0xFFFF0000;
             }
+            int x = getX();
+            int y = getY();
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, TEXTURE);
             blit(matrix, x, y, xStart, 166, width, height, TEXTURE_WIDTH, TEXTURE_HEIGHT);
