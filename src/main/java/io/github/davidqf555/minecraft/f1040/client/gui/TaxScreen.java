@@ -24,7 +24,7 @@ import java.util.UUID;
 
 public class TaxScreen extends Screen {
 
-    private static final Component TITLE = MutableComponent.create(new TranslatableContents("gui." + Form1040.MOD_ID + ".tax_screen")), PAY = MutableComponent.create(new TranslatableContents("gui." + Form1040.MOD_ID + ".tax_screen.pay"));
+    private static final Component TITLE = MutableComponent.create(new TranslatableContents("gui." + Form1040.MOD_ID + ".tax_screen", null, new Object[0])), PAY = MutableComponent.create(new TranslatableContents("gui." + Form1040.MOD_ID + ".tax_screen.pay", null, new Object[0]));
     private static final ResourceLocation TEXTURE = new ResourceLocation(Form1040.MOD_ID, "textures/gui/tax_screen.png");
     private static final int TEXTURE_WIDTH = 176, TEXTURE_HEIGHT = 184, X_SIZE = 176, Y_SIZE = 166, SLOT_WIDTH = 18, SLOT_HEIGHT = 18;
     private final Slot[] items;
@@ -99,7 +99,7 @@ public class TaxScreen extends Screen {
         }
 
         @Override
-        public void renderButton(PoseStack matrix, int mouseX, int mouseY, float partial) {
+        public void renderWidget(PoseStack matrix, int mouseX, int mouseY, float partial) {
             int x = getX();
             int y = getY();
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -108,8 +108,8 @@ public class TaxScreen extends Screen {
             ItemRenderer renderer = minecraft.getItemRenderer();
             int itemX = x + (width - 16) / 2;
             int itemY = y + (height - 16) / 2;
-            renderer.renderAndDecorateItem(item, itemX, itemY);
-            renderer.renderGuiItemDecorations(font, item, itemX, itemY, item.getCount() + "");
+            renderer.renderAndDecorateItem(matrix, item, itemX, itemY);
+            renderer.renderGuiItemDecorations(matrix, font, item, itemX, itemY, item.getCount() + "");
         }
 
         @Override
@@ -126,7 +126,7 @@ public class TaxScreen extends Screen {
         }
 
         @Override
-        public void renderButton(PoseStack matrix, int mouseX, int mouseY, float partial) {
+        public void renderWidget(PoseStack matrix, int mouseX, int mouseY, float partial) {
             int xStart;
             int color = 0xFFFFFFFF;
             if (!isHoveredOrFocused()) {

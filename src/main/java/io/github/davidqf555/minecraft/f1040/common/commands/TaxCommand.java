@@ -56,7 +56,7 @@ public final class TaxCommand {
                 }
             }
         }
-        source.sendSuccess(MutableComponent.create(new TranslatableContents(ADD, success)), true);
+        source.sendSuccess(MutableComponent.create(new TranslatableContents(ADD, null, new Object[]{success})), true);
         return success;
     }
 
@@ -65,7 +65,7 @@ public final class TaxCommand {
             Debt.get(player).clear();
         }
         int size = targets.size();
-        source.sendSuccess(MutableComponent.create(new TranslatableContents(CLEAR, size)), true);
+        source.sendSuccess(MutableComponent.create(new TranslatableContents(CLEAR, null, new Object[]{size})), true);
         return size;
     }
 }

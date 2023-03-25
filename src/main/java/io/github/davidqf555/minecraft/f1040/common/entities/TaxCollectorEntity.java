@@ -15,7 +15,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -33,7 +32,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
-import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
@@ -86,14 +84,6 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
         if (tickCount >= ServerConfigs.INSTANCE.taxPeriod.get()) {
             remove(RemovalReason.DISCARDED);
         }
-    }
-
-    @Nullable
-    @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawn, @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
-        setGovID(getRandom().nextInt(GovernmentData.MAX));
-        setCustomName(GovernmentData.getName(getGovID()));
-        return super.finalizeSpawn(world, difficulty, spawn, data, tag);
     }
 
     @Override

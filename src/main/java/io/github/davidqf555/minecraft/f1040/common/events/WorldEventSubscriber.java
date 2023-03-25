@@ -6,6 +6,7 @@ import io.github.davidqf555.minecraft.f1040.common.entities.ShadyBankerEntity;
 import io.github.davidqf555.minecraft.f1040.common.entities.TargetIndebtedGoal;
 import io.github.davidqf555.minecraft.f1040.common.entities.TaxCollectorEntity;
 import io.github.davidqf555.minecraft.f1040.common.player.Debt;
+import io.github.davidqf555.minecraft.f1040.common.world.data.GovernmentData;
 import io.github.davidqf555.minecraft.f1040.registration.EntityRegistry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
@@ -16,6 +17,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -60,6 +62,15 @@ public final class WorldEventSubscriber {
                     }
                 }
             });
+        }
+    }
+
+    @SubscribeEvent
+    public static void onFinalizeSpawn(MobSpawnEvent.FinalizeSpawn event) {
+        Mob mob = event.getEntity();
+        if (mob instanceof TaxCollectorEntity) {
+            ((TaxCollectorEntity) mob).setGovID(mob.getRandom().nextInt(GovernmentData.MAX));
+            mob.setCustomName(GovernmentData.getName(((TaxCollectorEntity) mob).getGovID()));
         }
     }
 
