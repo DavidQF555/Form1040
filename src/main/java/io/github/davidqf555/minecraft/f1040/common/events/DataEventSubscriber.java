@@ -29,8 +29,10 @@ public final class DataEventSubscriber {
     public static void onClonePlayerEvent(PlayerEvent.Clone event) {
         if (ServerConfigs.INSTANCE.persistent.get() && event.isWasDeath()) {
             ServerPlayer original = (ServerPlayer) event.getOriginal();
+            original.reviveCaps();
             ServerPlayer resp = (ServerPlayer) event.getEntity();
             Debt.get(resp).deserializeNBT(Debt.get(original).serializeNBT());
+            original.invalidateCaps();
         }
     }
 
