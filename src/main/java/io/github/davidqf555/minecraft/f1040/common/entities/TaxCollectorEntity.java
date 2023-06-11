@@ -246,12 +246,13 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
     }
 
     @Override
-    public void killed(ServerLevel world, LivingEntity entity) {
-        super.killed(world, entity);
-        if (entity instanceof Player) {
-            GovernmentRelations relations = GovernmentRelations.get((Player) entity);
+    public void die(DamageSource source) {
+        super.die(source);
+        LivingEntity credit = getKillCredit();
+        if (credit instanceof Player) {
+            GovernmentRelations relations = GovernmentRelations.get((Player) credit);
             relations.setTaxFactor(relations.getTaxFactor() * ServerConfigs.INSTANCE.taxIncreaseRate.get());
-            GovernmentData.multiplyShare(world.getServer(), getGovID(), entity.getUUID(), 0.5);
+            GovernmentData.multiplyShare(getServer(), getGovID(), credit.getUUID(), 0.5);
         }
     }
 
