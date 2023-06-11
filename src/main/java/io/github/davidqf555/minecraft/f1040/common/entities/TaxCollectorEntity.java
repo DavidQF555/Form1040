@@ -63,14 +63,14 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
         for (int i = 0; i < 10; i++) {
             int x = center.getX() + (random.nextInt(max - min + 1) + min) * (random.nextBoolean() ? -1 : 1);
             int z = center.getZ() + (random.nextInt(max - min + 1) + min) * (random.nextBoolean() ? -1 : 1);
-            int y = player.level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+            int y = player.level().getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
             BlockPos pos = new BlockPos(x, y, z);
-            if (NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, player.level, pos, type)) {
-                T entity = type.create(player.level);
+            if (NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, player.level(), pos, type)) {
+                T entity = type.create(player.level());
                 if (entity != null) {
                     Vec3 vec = Vec3.atBottomCenterOf(pos);
                     entity.setPos(vec.x(), vec.y(), vec.z());
-                    player.level.addFreshEntity(entity);
+                    player.level().addFreshEntity(entity);
                     return entity;
                 }
             }
@@ -126,10 +126,10 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
                     if (player.getRandom().nextDouble() < getBribeRate((ServerPlayer) player)) {
                         Debt.get(player).clear();
                         GovernmentData.multiplyShare(player.getServer(), getGovID(), player.getUUID(), 1.5);
-                        level.broadcastEntityEvent(this, (byte) 0);
+                        level().broadcastEntityEvent(this, (byte) 0);
                     } else {
                         Debt.add(player, getTaxRate((ServerPlayer) player));
-                        level.broadcastEntityEvent(this, (byte) 1);
+                        level().broadcastEntityEvent(this, (byte) 1);
                     }
                     return InteractionResult.CONSUME;
                 } else {
@@ -186,21 +186,21 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
                 double dX = random.nextGaussian() * 0.02;
                 double dY = random.nextGaussian() * 0.02;
                 double dZ = random.nextGaussian() * 0.02;
-                level.addParticle(ParticleTypes.HAPPY_VILLAGER, getRandomX(1), getRandomY() + 0.5, getRandomZ(1), dX, dY, dZ);
+                level().addParticle(ParticleTypes.HAPPY_VILLAGER, getRandomX(1), getRandomY() + 0.5, getRandomZ(1), dX, dY, dZ);
             }
         } else if (val == 1) {
             for (int i = 0; i < 7; i++) {
                 double dX = random.nextGaussian() * 0.02;
                 double dY = random.nextGaussian() * 0.02;
                 double dZ = random.nextGaussian() * 0.02;
-                level.addParticle(ParticleTypes.ANGRY_VILLAGER, getRandomX(1), getRandomY() + 0.5, getRandomZ(1), dX, dY, dZ);
+                level().addParticle(ParticleTypes.ANGRY_VILLAGER, getRandomX(1), getRandomY() + 0.5, getRandomZ(1), dX, dY, dZ);
             }
         } else if (val == 56) {
             for (int i = 0; i < 7; i++) {
                 double dX = random.nextGaussian() * 0.02;
                 double dY = random.nextGaussian() * 0.02;
                 double dZ = random.nextGaussian() * 0.02;
-                level.addParticle(ParticleTypes.SQUID_INK, getRandomX(1), getRandomY() + 0.5, getRandomZ(1), dX, dY, dZ);
+                level().addParticle(ParticleTypes.SQUID_INK, getRandomX(1), getRandomY() + 0.5, getRandomZ(1), dX, dY, dZ);
             }
         } else {
             super.handleEntityEvent(val);
@@ -229,15 +229,15 @@ public class TaxCollectorEntity extends PathfinderMob implements Npc {
     @Override
     protected void dropCustomDeathLoot(DamageSource source, int looting, boolean player) {
         super.dropCustomDeathLoot(source, looting, player);
-        if (player && level instanceof ServerLevel) {
-            List<ItemStack> items = GovernmentData.removeRandom((ServerLevel) level, getGovID(), getRandom(), ServerConfigs.INSTANCE.inventoryDropProportion.get());
+        if (player && level() instanceof ServerLevel) {
+            List<ItemStack> items = GovernmentData.removeRandom((ServerLevel) level(), getGovID(), getRandom(), ServerConfigs.INSTANCE.inventoryDropProportion.get());
             items.forEach(this::spawnAtLocation);
         }
     }
 
     @Override
-    public boolean wasKilled(ServerLevel world, LivingEntity entity) {
-        if (super.wasKilled(world, entity)) {
+    public boolean killedEntity(ServerLevel world, LivingEntity entity) {
+        if (super.killedEntity(world, entity)) {
             if (entity instanceof Player) {
                 GovernmentRelations relations = GovernmentRelations.get((Player) entity);
                 relations.setTaxFactor(relations.getTaxFactor() * ServerConfigs.INSTANCE.taxIncreaseRate.get());

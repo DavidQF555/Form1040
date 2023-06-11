@@ -33,7 +33,7 @@ public class PayTaxesPacket {
     private void handle(NetworkEvent.Context context) {
         ServerPlayer player = context.getSender();
         context.enqueueWork(() -> {
-            Entity entity = player.getLevel().getEntity(collector);
+            Entity entity = player.serverLevel().getEntity(collector);
             if (entity instanceof TaxCollectorEntity && player.equals(((TaxCollectorEntity) entity).getTradingPlayer()) && Debt.canPay(player)) {
                 Debt.pay(player, ((TaxCollectorEntity) entity).getGovID());
             }

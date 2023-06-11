@@ -68,11 +68,11 @@ public class ShadyBankerEntity extends AbstractVillager {
             if (hand == InteractionHand.MAIN_HAND) {
                 player.awardStat(Stats.TALKED_TO_VILLAGER);
             }
-            if (!getOffers().isEmpty() && !level.isClientSide()) {
+            if (!getOffers().isEmpty() && !level().isClientSide()) {
                 setTradingPlayer(player);
                 openTradingScreen(player, getDisplayName(), 1);
             }
-            return InteractionResult.sidedSuccess(level.isClientSide());
+            return InteractionResult.sidedSuccess(level().isClientSide());
         }
         return super.mobInteract(player, hand);
     }
@@ -115,7 +115,7 @@ public class ShadyBankerEntity extends AbstractVillager {
     protected void rewardTradeXp(MerchantOffer offer) {
         if (offer.shouldRewardExp()) {
             int i = 3 + this.random.nextInt(4);
-            this.level.addFreshEntity(new ExperienceOrb(this.level, this.getX(), this.getY() + 0.5D, this.getZ(), i));
+            this.level().addFreshEntity(new ExperienceOrb(this.level(), this.getX(), this.getY() + 0.5D, this.getZ(), i));
         }
     }
 

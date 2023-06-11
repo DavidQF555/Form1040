@@ -2,10 +2,10 @@ package io.github.davidqf555.minecraft.f1040.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.davidqf555.minecraft.f1040.common.Form1040;
 import io.github.davidqf555.minecraft.f1040.common.packets.PayTaxesPacket;
 import io.github.davidqf555.minecraft.f1040.common.packets.StopPayingPacket;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -58,12 +58,11 @@ public class TaxScreen extends Screen {
     }
 
     @Override
-    public void render(PoseStack matrix, int mouseX, int mouseY, float partial) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partial) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, TEXTURE);
-        blit(matrix, x, y, 0, 0, X_SIZE, Y_SIZE, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-        font.draw(matrix, title, x + (X_SIZE - font.width(title)) / 2f, y + 6, 0xFF404040);
-        super.render(matrix, mouseX, mouseY, partial);
+        graphics.blit(TEXTURE, x, y, 0, 0, X_SIZE, Y_SIZE, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        graphics.drawString(font, title, x + (X_SIZE - font.width(title)) / 2, y + 6, 0xFF404040, false);
+        super.render(graphics, mouseX, mouseY, partial);
     }
 
     @Override
@@ -99,17 +98,16 @@ public class TaxScreen extends Screen {
         }
 
         @Override
-        public void renderWidget(PoseStack matrix, int mouseX, int mouseY, float partial) {
+        public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partial) {
             int x = getX();
             int y = getY();
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, TEXTURE);
-            blit(matrix, x, y, 120, 166, width, height, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            graphics.blit(TEXTURE, x, y, 120, 166, width, height, TEXTURE_WIDTH, TEXTURE_HEIGHT);
             ItemRenderer renderer = minecraft.getItemRenderer();
             int itemX = x + (width - 16) / 2;
             int itemY = y + (height - 16) / 2;
-            renderer.renderAndDecorateItem(matrix, item, itemX, itemY);
-            renderer.renderGuiItemDecorations(matrix, font, item, itemX, itemY, item.getCount() + "");
+            graphics.renderItem(item, itemX, itemY);
+            graphics.renderItemDecorations(font, item, itemX, itemY, String.valueOf(item.getCount()));
         }
 
         @Override
@@ -126,7 +124,7 @@ public class TaxScreen extends Screen {
         }
 
         @Override
-        public void renderWidget(PoseStack matrix, int mouseX, int mouseY, float partial) {
+        public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partial) {
             int xStart;
             int color = 0xFFFFFFFF;
             if (!isHoveredOrFocused()) {
@@ -140,9 +138,8 @@ public class TaxScreen extends Screen {
             int x = getX();
             int y = getY();
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, TEXTURE);
-            blit(matrix, x, y, xStart, 166, width, height, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-            drawCenteredString(matrix, font, getMessage(), x + width / 2, y + (height - font.lineHeight) / 2, color);
+            graphics.blit(TEXTURE, x, y, xStart, 166, width, height, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            graphics.drawCenteredString(font, getMessage(), x + width / 2, y + (height - font.lineHeight) / 2, color);
         }
 
         @Override

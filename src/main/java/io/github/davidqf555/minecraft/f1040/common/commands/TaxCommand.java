@@ -46,17 +46,18 @@ public final class TaxCommand {
     }
 
     private static int add(CommandSourceStack source, Collection<ServerPlayer> targets, int amount) {
-        int success = 0;
+        int count = 0;
         for (ServerPlayer player : targets) {
             boolean added = false;
             for (int i = 0; i < amount; i++) {
                 if (Debt.add(player, ServerConfigs.INSTANCE.taxRate.get()) && !added) {
-                    success++;
+                    count++;
                     added = true;
                 }
             }
         }
-        source.sendSuccess(MutableComponent.create(new TranslatableContents(ADD, null, new Object[]{success})), true);
+        int success = count;
+        source.sendSuccess(() -> MutableComponent.create(new TranslatableContents(ADD, null, new Object[]{success})), true);
         return success;
     }
 
@@ -65,7 +66,7 @@ public final class TaxCommand {
             Debt.get(player).clear();
         }
         int size = targets.size();
-        source.sendSuccess(MutableComponent.create(new TranslatableContents(CLEAR, null, new Object[]{size})), true);
+        source.sendSuccess(() -> MutableComponent.create(new TranslatableContents(CLEAR, null, new Object[]{size})), true);
         return size;
     }
 }

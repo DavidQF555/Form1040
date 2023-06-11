@@ -34,7 +34,7 @@ public class StopPayingPacket {
     private void handle(NetworkEvent.Context context) {
         ServerPlayer player = context.getSender();
         context.enqueueWork(() -> {
-            Entity collector = player.getLevel().getEntity(this.collector);
+            Entity collector = player.serverLevel().getEntity(this.collector);
             if (collector instanceof TaxCollectorEntity) {
                 ((TaxCollectorEntity) collector).setTradingPlayer(null);
             }

@@ -30,7 +30,7 @@ public class FollowPlayersGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        Player player = mob.level.getNearestPlayer(mob, areaSize);
+        Player player = mob.level().getNearestPlayer(mob, areaSize);
         if (player != null) {
             followingMob = player;
             return true;

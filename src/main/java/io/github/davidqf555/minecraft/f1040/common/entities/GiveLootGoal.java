@@ -33,8 +33,8 @@ public class GiveLootGoal extends Goal {
             return false;
         }
         target = null;
-        for (Player player : mob.level.getEntitiesOfClass(Player.class, AABB.ofSize(mob.position(), range * 2, range * 2, range * 2))) {
-            if (GovernmentData.isCorrupted((ServerLevel) mob.level, mob.getGovID(), player.getUUID())) {
+        for (Player player : mob.level().getEntitiesOfClass(Player.class, AABB.ofSize(mob.position(), range * 2, range * 2, range * 2))) {
+            if (GovernmentData.isCorrupted((ServerLevel) mob.level(), mob.getGovID(), player.getUUID())) {
                 target = player;
                 break;
             }
@@ -65,7 +65,7 @@ public class GiveLootGoal extends Goal {
     }
 
     protected boolean entitiesNearby() {
-        for (Player player : mob.level.getEntitiesOfClass(Player.class, AABB.ofSize(target.position(), range * 2, range * 2, range * 2))) {
+        for (Player player : mob.level().getEntitiesOfClass(Player.class, AABB.ofSize(target.position(), range * 2, range * 2, range * 2))) {
             if (!player.equals(target) && player.hasLineOfSight(target)) {
                 return true;
             }
@@ -75,11 +75,11 @@ public class GiveLootGoal extends Goal {
 
     protected void pay() {
         Vec3 dir = target.position().subtract(mob.getEyePosition(1)).normalize();
-        List<ItemStack> items = GovernmentData.removeRandom((ServerLevel) mob.level, mob.getGovID(), mob.getRandom(), ServerConfigs.INSTANCE.lootProportion.get());
+        List<ItemStack> items = GovernmentData.removeRandom((ServerLevel) mob.level(), mob.getGovID(), mob.getRandom(), ServerConfigs.INSTANCE.lootProportion.get());
         for (ItemStack stack : items) {
-            ItemEntity item = new ItemEntity(mob.level, mob.getX(), mob.getEyeY(), mob.getZ(), stack);
+            ItemEntity item = new ItemEntity(mob.level(), mob.getX(), mob.getEyeY(), mob.getZ(), stack);
             item.setDeltaMovement(item.getDeltaMovement().add(dir));
-            mob.level.addFreshEntity(item);
+            mob.level().addFreshEntity(item);
         }
     }
 

@@ -71,7 +71,7 @@ public class Debt implements INBTSerializable<CompoundTag> {
         }
         Map<Item, Integer> items = new HashMap<>();
         debt.getAllDebt().forEach(item -> items.put(item, debt.getDebt(item)));
-        GovernmentData.add((ServerLevel) player.level, id, items);
+        GovernmentData.add((ServerLevel) player.level(), id, items);
         debt.clear();
         GovernmentRelations relations = GovernmentRelations.get(player);
         relations.setTaxFactor(relations.getTaxFactor() * ServerConfigs.INSTANCE.taxDecreaseRate.get());

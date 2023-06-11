@@ -25,10 +25,10 @@ public class TargetIndebtedGoal<T extends Mob> extends TargetGoal {
     @Override
     public boolean canUse() {
         AABB bounds = mob.getBoundingBox().inflate(getFollowDistance());
-        Stream<Player> stream = mob.level.getEntitiesOfClass(Player.class, bounds, EntitySelector.NO_CREATIVE_OR_SPECTATOR).stream().filter(Debt::isIndebted);
+        Stream<Player> stream = mob.level().getEntitiesOfClass(Player.class, bounds, EntitySelector.NO_CREATIVE_OR_SPECTATOR).stream().filter(Debt::isIndebted);
         if (mob instanceof TaxCollectorEntity) {
             int id = ((TaxCollectorEntity) mob).getGovID();
-            stream = stream.filter(player -> !GovernmentData.isCorrupted((ServerLevel) mob.level, id, player.getUUID()));
+            stream = stream.filter(player -> !GovernmentData.isCorrupted((ServerLevel) mob.level(), id, player.getUUID()));
         }
         target = stream.min(Comparator.comparingDouble(mob::distanceToSqr));
         return target.isPresent();
